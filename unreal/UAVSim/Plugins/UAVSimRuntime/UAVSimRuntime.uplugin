@@ -1,8 +1,0 @@
-{
-  "FileVersion": 3,
-  "Version": 1,
-  "VersionName": "0.2.0",
-  "FriendlyName": "UAVSim portable simulation bridge",
-  "CanContainContent": false,
-  "Modules": [{"Name": "UAVSimRuntime", "Type": "Runtime", "LoadingPhase": "Default"}]
-}

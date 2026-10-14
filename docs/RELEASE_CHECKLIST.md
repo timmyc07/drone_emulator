@@ -19,7 +19,7 @@ The user replaced the desktop delivery target with a browser game. The earlier d
 
 Commands and limitations are in [WEB_GAME.md](WEB_GAME.md). Unchecked items are not PASS.
 
-## Historical desktop release checklist — suspended
+## Historical desktop release checklist — retired
 
 Version 0.2.0 is an implementation under acceptance, not a completed P7 release. A build or automatic smoke test alone does not establish a fully usable packaged simulator.
 
@@ -33,7 +33,7 @@ Version 0.2.0 is an implementation under acceptance, not a completed P7 release.
 - [ ] Complete interactive aircraft/scene selection, flight/landing, pause/reset, settings persistence, save/playback and normal exit.
 - [ ] Verify real gamepad hardware/input protocol; keep untested device support labeled.
 - [ ] Complete Electric Dreams download/import/cooking and actual frame/memory measurements.
-- [x] Produce and launch the first standalone Windows package without Editor; see [first-package evidence](WINDOWS_PACKAGE.md).
+- [x] Produce and launch the first standalone Windows package without Editor; historical execution details remain in PROJECT_STATUS.
 - [ ] Rebuild/retest after the failed drone material compilation and observed lighting, dropdown and menu-status repairs; complete visual and full interactive regression.
 - [ ] Verify packaged configuration, assets, runtime prerequisites and third-party license notices.
 - [ ] Verify writable sessions, missing/corrupt resources, failed writes and recovery on a clean target environment.
@@ -41,4 +41,4 @@ Version 0.2.0 is an implementation under acceptance, not a completed P7 release.
 - [ ] Provide artifact version/checksums, supported requirements and upgrade instructions.
 - [ ] Implement and verify the P4–P6 capabilities before declaring the full MASTER_PLAN product complete.
 
-Current evidence is in [PROJECT_STATUS.md](PROJECT_STATUS.md). Hosted CI verifies the portable core at the stated commit; Unreal, physical Machine A and release acceptance retain their independent gates. Subsequent source changes require fresh CI evidence.
+Current evidence is in [PROJECT_STATUS.md](PROJECT_STATUS.md). The cited hosted run verifies only the portable core and does not establish browser acceptance. Subsequent source changes require fresh CI evidence.

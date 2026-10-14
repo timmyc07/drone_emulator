@@ -2,7 +2,7 @@
 
 ## Active browser delivery — 2026-10-14
 
-The user replaced the Unreal desktop target with a browser drone game using the same supplied ZIP drone. The previous desktop sequence below is suspended. The C++20 headless core remains the shared physics implementation; browser work does not require another Unreal build or Electric Dreams migration.
+The user replaced the Unreal desktop target with a browser drone game using the same supplied ZIP drone. The Unreal source, generated project and desktop tools have since been removed at the user's direction. The C++20 headless core remains the physics implementation; browser work does not require Unreal or Electric Dreams migration.
 
 1. Compile the existing core to WebAssembly with project-local Emscripten and verify finite state, hover and input/control behavior.
 2. Build and inspect the responsive Three.js game, independent forest, supplied default model and its materials; verify loading errors visibly block an invalid start.
@@ -10,27 +10,21 @@ The user replaced the Unreal desktop target with a browser drone game using the 
 4. Verify the local-only static server and prepared output boundary, preserve dependency notices and exclude unlicensed-for-redistribution user assets from GitHub.
 5. Run native regression checks, record actual browser/build evidence, update source documentation and synchronize source changes. Public hosting and broad P4–P7 expansion are outside this browser delivery.
 
-See [WEB_GAME.md](WEB_GAME.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md). Browser results are NOT_TESTED until executed and captured.
+See [WEB_GAME.md](WEB_GAME.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md) for executed browser results and remaining NOT_TESTED gates.
 
-## Historical desktop roadmap — suspended
+## Historical desktop roadmap — retired
 
-Current focus: complete the usable Windows product acceptance after the verified P1 headless core. Unreal 5.8.3 is the selected engine. P2/P3 automated product evidence and the first standalone package/runtime have passed. Interactive repairs/regression, clean-machine release acceptance and the requested Electric Dreams environment still require completion. [PROJECT_STATUS.md](PROJECT_STATUS.md) records current commands/results; the full product is not complete.
+This desktop roadmap is retained as historical context. The user retired the Unreal product and desktop-only tools on 2026-10-14; its source and generated project content have been removed. [PROJECT_STATUS.md](PROJECT_STATUS.md) preserves earlier execution evidence.
 
-Next executable gates:
-
-1. Finish product Unreal build/automation/runtime after final repairs, then exercise flight, settings persistence, save/playback and exit interactively.
-2. Rebuild and revalidate the standalone Windows package after the observed UI/lighting repairs. The first package already passed launch/runtime, JSON and notice checks; verify runtime prerequisites and recovery on a clean machine.
-3. Complete Electric Dreams acquisition, map integration/cooking and actual resource/performance validation on the 32 GiB Windows host.
-4. Keep hosted core CI passing as source changes continue. Product commit `7f21881c1b8adbe252f74793250bbb262b1df49b` already passed Windows 6/6 and macOS ARM64 5/5 CTests in [run 38542931069](https://github.com/timmyc07/drone_emulator/actions/runs/38542931069).
-5. Keep actual gamepad verification, Machine A setup and WSL initialization explicit. Define and execute later-phase gates before implementing those phases.
+The desktop acceptance gates were retired with the application. Historical results and incomplete gates remain in [PROJECT_STATUS.md](PROJECT_STATUS.md); they are not current development tasks.
 
 ## Product phases
 
-The full governing requirements and phase gates remain in [MASTER_PLAN.md](MASTER_PLAN.md).
+The original desktop phase table below and requirements in [MASTER_PLAN.md](MASTER_PLAN.md) are historical; browser acceptance gates are in [WEB_GAME.md](WEB_GAME.md).
 
 | Phase | Deliverable and acceptance |
 | --- | --- |
-| P0 Infrastructure | Repository, both platform instructions, environment evidence, builds/tests, CI configuration and recorded cross-platform results; honor strict host/Unreal gates in P0_PLAN |
+| P0 Infrastructure | Historical desktop/bootstrap requirements; active C++ core CI remains in `.github/workflows/core-ci.yml` |
 | P1 Flight Dynamics | Headless math, 6-DOF, propulsion/environment, reference quadrotor/configuration, telemetry; required physics tests and hover pass |
 | P2 Flyable Unreal Prototype | C++ bridge, visible quadrotor/simple level, input/camera/HUD, start/pause/reset; controls affect actual validated dynamics |
 | P3 Usable Simulator | Menus, aircraft/environment selection, settings/gamepad, modes, recording/playback, Windows package; user can run without Editor |

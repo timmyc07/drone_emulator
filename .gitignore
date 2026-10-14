@@ -12,15 +12,6 @@ venv/
 __pycache__/
 *.py[cod]
 
-# Unreal
-Binaries/
-DerivedDataCache/
-Intermediate/
-Saved/
-.vs/
-*.sln
-*.suo
-
 # Local reports and credentials
 reports/environment/*-local.json
 reports/performance/*-local.md
@@ -29,19 +20,14 @@ reports/performance/*-local.md
 *.key
 .DS_Store
 
-# Windows session private evidence and generated validation map
+# Local session evidence
 reports/
 CMakeUserPresets.json
 *.user
-unreal/P0Probe/Content/
-unreal/P0Probe/Config/DefaultInput.ini
 
 # User-owned sample content, model sources and product build outputs
 local-assets/
 dist/
-unreal/UAVSim/Content/
-unreal/UAVSim/Config/DefaultInput.ini
-unreal/UAVSim/Config/Vehicles/
 
 # Reproducible browser dependencies and compiled physics; user assets stay local.
 web/vendor/

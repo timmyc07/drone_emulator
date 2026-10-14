@@ -1,8 +1,5 @@
 * text=auto eol=lf
 *.sh text eol=lf
 *.ps1 text eol=crlf
-*.uasset filter=lfs diff=lfs merge=lfs -text
-*.umap filter=lfs diff=lfs merge=lfs -text
-
 # Preserve exact upstream source and license bytes.
 third_party/** -text

@@ -2,7 +2,7 @@
 
 ## Current user-directed target — 2026-10-14
 
-The user replaced the Unreal desktop delivery target with a browser drone game. This overrides earlier Unreal implementation, Electric Dreams integration and Windows-package requirements for current work. Reuse the independent C++20 simulation core through WebAssembly and keep the user's supplied ZIP drone as the default visual model. Do not resume Unreal builds/migration or convert UE-only Electric Dreams content for the web. Existing Unreal source, local assets and historical test evidence remain preserved.
+The user replaced the Unreal desktop delivery target with a browser drone game. The user later authorized removal of the Unreal application and desktop-only tooling. Reuse the independent C++20 simulation core through WebAssembly and keep the user's supplied ZIP drone as the default visual model. Do not restore Unreal builds/migration or convert UE-only Electric Dreams content for the web. Preserve the user's local drone/assets and historical validation evidence.
 
 Use a responsive browser UI and a project-local build. Serve only the prepared `dist/web` directory on `127.0.0.1`; do not expose the repository or publish a hosted site. The supplied drone assets remain ignored/local while redistribution permission is unverified. Browser acceptance requires actual rendered model/material and interaction evidence; prior native/Unreal PASS results do not establish browser success. The review, documentation, validation and commit/push rules below still apply to source changes.
 
@@ -11,7 +11,7 @@ Use a responsive browser UI and a project-local build. Serve only the prepared `
 - Prioritize shippable software and operational evidence; do not add academic thesis deliverables.
 - Every build and test claim requires captured command evidence.
 - Develop with platform awareness: macOS validation runs on macOS and Windows validation runs on Windows.
-- Never claim an untested platform, dependency, CI workflow, Unreal project, or benchmark as successful.
+- Never claim an untested platform, dependency, CI workflow, or benchmark as successful.
 - Manage dependencies conservatively; do not replace existing toolchains or modify machine-wide settings without explicit approval.
 - Do not use destructive cleanup to resolve setup problems.
 - Update `docs/PROJECT_STATUS.md` after each P0 task or session.
@@ -21,9 +21,9 @@ Use a responsive browser UI and a project-local build. Serve only the prepared `
 
 ## Scope and architecture
 
-- Build a maintainable UAV simulation software product; do not create academic thesis deliverables.
-- Use cross-platform C++20. Keep the headless core independent of Unreal Engine.
-- P0 prepares development infrastructure only; do not implement flight dynamics.
+- Build a maintainable browser UAV game; do not create academic thesis deliverables.
+- Use cross-platform C++20 for simulation, WebAssembly for browser execution, and Three.js for rendering. Keep the headless core independent of any renderer.
+- Keep delivery local to `127.0.0.1`; serve only the prepared `dist/web` directory.
 - Prefer existing code, standard-library/platform features, and installed dependencies. Keep changes minimal and complete.
 
 ## Before every implementation
@@ -50,7 +50,7 @@ Use a responsive browser UI and a project-local build. Serve only the prepared `
 - Run necessary verification and capture actual command results. Distinguish PASS, FAIL, BLOCKED, DEFERRED, and NOT_TESTED; absence of testing is never PASS.
 - Update `docs/PROJECT_STATUS.md`, `docs/P0_PLAN.md`, `docs/DEPENDENCIES.md`, and `docs/DECISIONS.md` as applicable after each task.
 - Commit and push completed changes to the configured GitHub remote. Do not overwrite an existing remote or invent Git identity. Record a blocker when authentication, identity, or remote access prevents synchronization.
-- Do not declare P0 complete until mandatory acceptance gates pass on the respective hosts. Unreal acceptance requires a real compiler/editor/level test; CI acceptance requires an actual successful run.
+- Browser acceptance requires actual WebAssembly and rendered-model/interaction evidence; native/Unreal historical results do not establish browser success. CI acceptance requires an actual successful run.
 
 ## Ponytail default
 

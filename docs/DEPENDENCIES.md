@@ -8,7 +8,7 @@ The fixed Three.js official npm archive is checked against integrity `sha512-blF
 
 GitHub/official research: [Emscripten SDK](https://github.com/emscripten-core/emsdk), [Emscripten build guidance](https://emscripten.org/docs/compiling/Building-Projects.html), [Three.js](https://github.com/mrdoob/three.js), [FBXLoader documentation](https://threejs.org/docs/pages/FBXLoader.html), [Three.js MIT license](https://github.com/mrdoob/three.js/blob/dev/LICENSE), and [Node HTTP documentation](https://nodejs.org/api/http.html). Current online documentation is checked against the actual selected tools; availability alone is not compatibility evidence.
 
-Electric Dreams is excluded from the browser due to its [UE-only designation](https://www.fab.com/listings/d79688f5-29be-4fb2-a650-2d4a813f5306). The supplied drone's redistribution license remains unverified. Local generated bundles, SDKs and source assets stay ignored. No Unreal installation or build is required to run the browser game. Entries below preserve historical desktop and core provenance.
+Electric Dreams is excluded from the browser due to its [UE-only designation](https://www.fab.com/listings/d79688f5-29be-4fb2-a650-2d4a813f5306). The supplied drone's redistribution license remains unverified. Local generated bundles, SDKs and source assets stay ignored. The Unreal project and desktop-only tooling were removed under the user's direction; entries below preserve historical dependency provenance.
 
 ## Historical desktop and shared core dependencies
 
@@ -52,7 +52,7 @@ The project-local `.venv` is intentionally ignored and contains only CMake/Ninja
 
 ## Machine B
 
-NOT_TESTED from this Mac session. Use `tools/environment/audit_windows.ps1` on Windows and follow `docs/WINDOWS_CONTINUATION.md`.
+Historical inventory from the earlier Mac session. Current Windows native-core validation uses `tools/validation/validate_windows.ps1`.
 
 ---
 

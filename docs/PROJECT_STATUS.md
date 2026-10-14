@@ -2,7 +2,15 @@
 
 ## Active browser pivot — 2026-10-14
 
-The user changed the deliverable to a browser drone game without Unreal and retained the same supplied ZIP drone as the default model. The earlier desktop status below is historical evidence; remaining Unreal fixes, packages and Electric Dreams migration are suspended. No earlier PASS is carried over to browser acceptance.
+The user changed the deliverable to a browser drone game without Unreal and retained the same supplied ZIP drone as the default model. On 2026-10-14 the user authorized removal of the Unreal application and desktop-only tools, including local Unreal build outputs. The source drone and Electric Dreams assets under ignored `local-assets/`, and historical validation reports under ignored `reports/`, remain. Desktop status below is historical evidence; no earlier PASS is carried over to browser acceptance.
+
+## Unreal desktop retirement — 2026-10-14
+
+The user explicitly overrode the earlier source-preservation rule and authorized retiring the old desktop application. Removed the tracked `unreal/` and `tools/unreal/` trees, Unreal build/package/validation tools, obsolete WSL preparation, and Windows desktop instruction pages. The `unreal/` tree contained 639 files totaling 11.31 GiB, including generated build/cache/content files. Kept the browser's C++20 core, native validation, WebAssembly and Three.js code, hosted core CI, original local assets and historical `reports/` evidence.
+
+Before removal, the dirty tracked Unreal/package diffs and two untracked Unreal scripts were copied into ignored `reports/unreal-retirement-worktree-backup-20261014/`. The backup includes a patch for tracked changes and exact copies of the untracked scripts, preserving the user's unfinished work outside active source paths.
+
+Cleanup verification on this Windows host: existing native-core CTest suite PASS (6/6, 2.56 s); browser game-logic and site-build preflight tests PASS; `git diff --check` PASS. The static-server test hit sandbox `EPERM` at Node.js `realpath` for its temporary directory, even after moving `TEMP` under the workspace; no browser server code changed. The earlier successful HTTP boundary evidence remains in `reports/web-final-validation.log`.
 
 Three parallel preimplementation reviews covered current official/GitHub compatibility, core/frontend failure risks and conventions/operations/licensing before browser changes. The reviewed architecture reuses the C++20 core through project-local Emscripten 6.0.12 and Three.js rendering. The local server exposes only prepared `dist/web` files on `127.0.0.1:4173`. The scene is independently created: [Electric Dreams is UE-only](https://www.fab.com/listings/d79688f5-29be-4fb2-a650-2d4a813f5306). Supplied FBX/textures remain local and excluded from GitHub.
 
@@ -55,13 +63,13 @@ The local reference configuration hash used above is `2fff42c10efba4dfb7a52be4e1
 
 Historical [run 38536058546](https://github.com/timmyc07/drone_emulator/actions/runs/38536058546), P0 commit `0531568c3a741ca988cafdb0059471746f3a8883`, passed macOS but failed Windows before CMake on the quoted `Program Files` developer-script path. The process-local helper and spaces/parentheses, child-isolation and failure-handling regression resolved that failure in the successful product run above. All three Actions v7 resolved and ran. The user made the existing repository public; log inspection used the GitHub connector, without credential extraction.
 
-Machine A still requires its own Python 3.12 and current-source check; hosted macOS evidence does not change that machine's installed software. WSL installation still requires the separately approved reboot before Ubuntu initialization. These blockers do not masquerade as PASS.
+Historical platform note: Machine A needed its own Python 3.12 and current-source check; hosted macOS evidence did not change that machine's installed software. WSL is not a browser-game prerequisite.
 
 ### Commands and next gates
 
-Executed `tools/bootstrap/build_windows.ps1` (configure/build/CTest), `tools/validation/validate_product.ps1 -SkipBuild`, Unreal `Build.bat UAVSimEditor Win64 Development`, product automation, asset import and DX12 game runtime. Exact outputs live under ignored `reports/product`. The restricted MSVC C1902 failure was preserved and the same compiler succeeded outside the sandbox. The product validator now explicitly returns success after all expected negative cases; a wrapper test returned 0 (`validator-exit-contract.log`) while the actual script run with a missing executable returned 1 (`validator-missing-executable.log`). The consolidated Unreal validator is `tools/validation/validate_product_unreal.ps1`, with optional `-SkipBuild` and `-PackagedExecutable`; creation of that script alone is not an additional executed result.
+Historical commands included `tools/bootstrap/build_windows.ps1`, `tools/validation/validate_product.ps1 -SkipBuild`, Unreal `Build.bat UAVSimEditor Win64 Development`, product automation, asset import and DX12 runtime. Exact outputs remain under ignored `reports/product`. The restricted MSVC C1902 failure was preserved and the same compiler succeeded outside the sandbox. The product validator's failure handling was verified: a wrapper test returned 0 (`validator-exit-contract.log`) while the script with a missing executable returned 1 (`validator-missing-executable.log`). Unreal-specific validators were removed during retirement.
 
-First-package launch instructions, executable checksums and limitations are in [WINDOWS_PACKAGE.md](WINDOWS_PACKAGE.md). Next: rebuild and retest the package after the observed UI/lighting repairs; complete interactive flight/settings/session workflow and clean-machine acceptance; acquire/import/profile Electric Dreams. Keep both hosted CI jobs passing for subsequent source changes. Preserve unverified gamepad, host-specific and later-stage gates. This section supersedes the historical P0-only status below.
+The first-package run, executable checksums and limitations remain in local `reports/product` and the historical entries below. At retirement, interactive flight/settings/session acceptance, clean-machine acceptance and Electric Dreams integration were incomplete; these desktop tasks are retired. Keep both hosted CI jobs passing for subsequent source changes. Preserve browser hardware and host-specific gates as NOT_TESTED.
 
 ## Historical P0 closeout (preserved)
 
@@ -88,7 +96,7 @@ First-package launch instructions, executable checksums and limitations are in [
 - Initial local directory was empty. After the remote appeared during the session, fetched `origin/main` at `a7b3016` and completed three additional integration reviews. Preserved original core sources, version header, smoke test, master plan and Mac evidence; backed up overlapping local scaffold files before integration.
 - Reused existing tools. No Unreal installation, compiler replacement, GPU-driver update, global PATH/Git identity change, `.wslconfig` change, or restart was performed. Repository-local Git identity uses the verified GitHub account's noreply address.
 - Approved system changes: Microsoft-signed WSL 3.0.3 MSI (exit 0), VirtualMachinePlatform enable with `/norestart` (3010), and component-only VS `.NET Framework 4.8 SDK` repair (exit 0, required header verified).
-- Executed `tools/environment/audit_windows.ps1`, `tools/validation/validate_windows.ps1`, `tools/validation/measure_windows.ps1`, and `tools/validation/validate_unreal.ps1` on this host.
+- Historically executed `tools/environment/audit_windows.ps1`, `tools/validation/validate_windows.ps1`, `tools/validation/measure_windows.ps1`, and the now-retired Unreal fixture validator on this host.
 - Core script executed `cmake --preset windows-x64-debug`, `cmake --build --preset windows-x64-debug`, and `ctest --preset windows-x64-debug` after importing only process-local VS developer settings. Corrected the prior Ninja single-config executable path.
 - Unreal used `Build.bat P0ProbeEditor Win64 Development -Project=... -MaxParallelActions=2`, then Editor automation with JSON report inspection and separate DX12 game/editor runs. Lightweight generated cube level, 1920x1080 development resolution, Medium scalability groups, disabled Lumen/ray tracing.
 - Checked all PowerShell syntax, preset/project JSON, original-source preservation, ignore rules and Git whitespace. Mac shell scripts retain their executable Git modes; their updated execution remains unverified on Machine A.
@@ -108,7 +116,7 @@ Unreal measurements and limitations are in the final resource summary below. Fir
 
 Private detailed reports are ignored under `reports/environment`, `reports/validation`, `reports/performance`, `reports/unreal` and `reports/install`. Initial audits, failed attempts, bootstrap-only baselines and successful reports are preserved. The previous tracked Windows placeholder baseline is replaced by this sanitized summary; historical Mac reports remain unchanged.
 
-Historical next actions at P0 closeout: obtain separate reboot approval, inspect WSL after reboot, complete approved Ubuntu 22.04 initialization and verify Machine A Python 3.12. Resource limits (8 GB RAM / 4 GB swap) were proposals, not applied settings. The subsequent user authorization expanded the task into product flight dynamics; current next gates are listed above.
+Historical next actions at P0 closeout included a separately approved reboot, WSL/Ubuntu initialization and Machine A Python 3.12. Resource limits (8 GB RAM / 4 GB swap) were proposals, not applied settings. The desktop continuation guide was removed during retirement; current browser gates are listed at the start of this file.
 
 ## Governing plan
 
@@ -143,7 +151,7 @@ The following is the original Mac status record. Its Windows/CI NOT_TESTED state
 
 ## Next executable task
 
-Run `docs/WINDOWS_CONTINUATION.md` on Machine B, then trigger CI and attach its actual logs.
+This next-action note is historical. Current browser and native-core checks are listed at the start of this file and in WEB_GAME.md.
 ## Primary plan
 
 The governing product plan is [CODEX MASTER PROMPT V2.0](MASTER_PLAN.md).

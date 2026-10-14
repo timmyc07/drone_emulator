@@ -2,7 +2,7 @@
 
 ## Browser target supersedes desktop delivery
 
-The user's later instruction changes the product delivery to a browser drone game without Unreal, with the same ZIP drone as the default model. Preserve the portable C++20 physics core and compile it through project-local Emscripten 6.0.12; use Three.js and its upstream FBXLoader rather than replace the validated dynamics or write a model parser. Existing Unreal source/repairs and their evidence remain preserved, but further Unreal builds, Electric Dreams migration and Windows packaging are suspended.
+The user's later instruction changes the product delivery to a browser drone game without Unreal, with the same ZIP drone as the default model. Preserve the portable C++20 physics core and compile it through project-local Emscripten 6.0.12; use Three.js and its upstream FBXLoader rather than replace the validated dynamics or write a model parser. On 2026-10-14 the user explicitly authorized retiring the Unreal app and desktop-only tools. Their source and local generated project data were removed; local source assets and historical validation evidence remain.
 
 Three parallel reviews were completed before this implementation: official compatibility and GitHub reuse; existing core/frontend/configuration risks; and conventions, deployment boundaries and asset licensing. GitHub searches examined [Emscripten SDK](https://github.com/emscripten-core/emsdk), [Three.js FBX example](https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_fbx.html), its loader and license, and [http-server](https://github.com/http-party/http-server). Reuse the installed Node standard library for the small local static server; an additional server framework/package is unnecessary. Keep dependency versions and upstream notices in the prepared bundle.
 
@@ -12,7 +12,7 @@ The Windows WebAssembly build and 5,000-step native comparison now pass with max
 
 The independent forest does not reuse Electric Dreams: its [official listing](https://www.fab.com/listings/d79688f5-29be-4fb2-a650-2d4a813f5306) explicitly restricts it to Unreal-based products, consistent with the [Epic Content License Agreement](https://www.unrealengine.com/eula/content). Local user-authorized use of the supplied FBX and six textures does not establish redistribution permission; keep them ignored and out of hosted publication/GitHub. The model remains cosmetic relative to the estimated reference quadrotor parameters.
 
-The former desktop decisions below are historical where they conflict with this override. Prior native/Unreal test results are not browser results. Use [PROJECT_STATUS.md](PROJECT_STATUS.md) for actual evidence and [WEB_GAME.md](WEB_GAME.md) for the current workflow.
+The former desktop decisions below are historical. Prior native/Unreal test results are not browser results. Use [PROJECT_STATUS.md](PROJECT_STATUS.md) for actual evidence and [WEB_GAME.md](WEB_GAME.md) for the current workflow.
 
 ## Earlier desktop implementation decisions
 
@@ -25,7 +25,7 @@ The user authorized implementing the product beyond P0. Three parallel preimplem
 - Validate complete positive-definite inertia and rotor allocation, reject nonfinite state/configuration, and stage a step before publishing it. Controllers and motor lag generate movement through dynamics. Ground contact is a documented flat, inelastic approximation; scenery does not imply terrain collision fidelity.
 - Require vehicle provenance, assumptions and exact-byte SHA256. Treat the user-provided visual drone as cosmetic, with physical properties explicitly estimated. Keep external raw assets local pending their redistribution terms.
 - Distinguish headless input re-execution (version/hash/timestep checks and trajectory comparison) from desktop recorded-state playback. Use explicit format/schema versions and reject malformed/corrupt data; do not describe state playback as deterministic simulation.
-- Retain the P0 fixture unchanged in purpose; product implementation lives under `unreal/UAVSim`. Test the lightweight environment first, then complete the user's requested Electric Dreams environment and profile its actual resource use.
+- Historical: the P0 fixture was kept separate from the Unreal product. Both were removed when the user retired the desktop app; the browser forest remains independently created and does not use Electric Dreams.
 - Repair Windows hosted CI by preserving raw `cmd` quoting in a process-local developer-environment helper. Regressions cover spaces/parentheses, child isolation and nonzero exit. Action v7 versions were proven valid by the actual hosted run; changing them would not fix the path bug.
 - A validation script containing expected native failures must explicitly `exit 0` only after all checks and transcript cleanup succeed. PowerShell otherwise leaves the final native rejection in `$LASTEXITCODE`, misleading wrappers. Exceptions still skip the success exit. This follows [PowerShell's exit-code semantics](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_automatic_variables#lastexitcode) and [upstream discussion](https://github.com/MicrosoftDocs/PowerShell-Docs/issues/9194).
 
