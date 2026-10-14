@@ -1,8 +1,44 @@
 # Project Status
 
+## Current product session — 2026-10-14
+
+**Host:** Windows 11 x64, Ryzen 7 7700, 32 GiB installed RAM, RTX 5070. **Source version:** 0.2.0. **Progress:** P1 implemented and verified on this Windows host; P2/P3 product integration is undergoing acceptance. The complete MASTER_PLAN product, Electric Dreams integration and P4–P7 are not complete.
+
+| Component/gate | Actual evidence and status |
+| --- | --- |
+| Portable dynamics/control/configuration | IMPLEMENTED AND VERIFIED on Windows: Eigen math, RK4 6-DOF, validated inertia/rotor geometry, first-order motors, drag/wind/gravity/flat ground, rate/attitude/altitude modes, PID reset/anti-windup, strict JSON/provenance and SHA256 |
+| Core CTest | PASS: 6/6 in `reports/product/final-core-validation.log`, 2.34 s; includes Windows environment path regression, physics, config, original smoke and invalid argument cases |
+| Headless end-to-end | PASS: `reports/product/20261014-092001-6027898/validation.log`; 30 s hover and recorded-input replay, 7,500 steps each, maximum hover/replay error 0; takeoff-land peak about 2.174 m and final ground contact/zero speed; 7,501 CSV rows and independently checked SHA256 |
+| Negative input/replay checks | PASS: malformed/invalid configuration, nonfinite duration, output overwrite, changed config hash, altered trajectory and embedded NUL corruption rejected. The NUL test reproduced acceptance of corruption in the previous binary, then passed after the fix |
+| Unreal product Editor build | PASS: `reports/product/unreal-build.log`, `Result: Succeeded`; earlier header/lifecycle build failures retained separately |
+| Unreal adapter/lifecycle automation | PASS: `reports/product/editor-tests.log`, `UAVSim.Product.AdapterAndLifecycle` Success; coordinate mapping, physical input directions, frame schedules, pause/reset and disabled Chaos checked |
+| Product DX12 runtime smoke | PASS: `reports/product/runtime-smoke.log`, model `SM_DefaultDrone`, fixed step 0.004 s, 752-frame save/playback and `UAVSIM_RUNTIME_PASS` at frame 179; this is automated runtime evidence, not full manual UI acceptance |
+| Drone asset import | PASS: `reports/product/asset-import.log`, `UAVSIM_DRONE_IMPORT_PASS ... textures=6`; raw assets stay local pending redistribution-license verification |
+| Final replay hardening and repeatable Unreal validation | PASS: `reports/product/replay-build.log` (30.82 s), then `reports/product/unreal-20261014-092847-1541711/validation.json`: both `AdapterAndLifecycle` and `ReplayValidation` Success with zero errors; DX12 smoke frame 235, altitude 0.5871 m, real default model and pause/reset/save/replay verified. Oversized/nonfinite states, origins and motor values are rejected before rendering |
+| Desktop menu/settings/input | IMPLEMENTED; full interactive settings persistence, user flight/landing and actual gamepad hardware acceptance NOT_TESTED |
+| Windows package | IN PROGRESS / NOT_YET_VERIFIED: standalone cook/package and execution are separate gates from Editor build/runtime |
+| Electric Dreams | Requested; acquisition/integration IN PROGRESS. No completed download, import, performance or packaged environment acceptance claimed |
+| P4–P7 | PLANNED: multiple vehicle families, advanced sensors/SITL/weather, library expansion and product release gates not implemented/verified |
+
+The local reference configuration hash used above is `2fff42c10efba4dfb7a52be4e1f7644fa97dee3949789501f00353fe8cc3f0dd`. Numerical results apply to the fictional engineering-estimate quadrotor, not a calibrated real aircraft. Unit test details and acceptance thresholds are in [P1_ACCEPTANCE.md](P1_ACCEPTANCE.md).
+
+### Hosted CI and remaining infrastructure
+
+[Run 38536058546](https://github.com/timmyc07/drone_emulator/actions/runs/38536058546) tested P0 commit `0531568c3a741ca988cafdb0059471746f3a8883`: macOS ARM64 PASS (Apple Clang 15.0.0, 3/3 CTests, Python 3.12.10); Windows FAIL before CMake because the quoted `Program Files` developer-script path was parsed incorrectly. All three Actions v7 resolved and ran. The local helper repair passes path-with-spaces/parentheses, child isolation and failure handling tests; a new hosted run must establish the repaired and current product source status. The user made the existing repository public; no credential extraction was used for log inspection.
+
+Machine A still requires its own Python 3.12 and current-source check; hosted macOS evidence does not change that machine's installed software. WSL installation still requires the separately approved reboot before Ubuntu initialization. These blockers do not masquerade as PASS.
+
+### Commands and next gates
+
+Executed `tools/bootstrap/build_windows.ps1` (configure/build/CTest), `tools/validation/validate_product.ps1 -SkipBuild`, Unreal `Build.bat UAVSimEditor Win64 Development`, product automation, asset import and DX12 game runtime. Exact outputs live under ignored `reports/product`. The restricted MSVC C1902 failure was preserved and the same compiler succeeded outside the sandbox. The product validator now explicitly returns success after all expected negative cases; a wrapper test returned 0 (`validator-exit-contract.log`) while the actual script run with a missing executable returned 1 (`validator-missing-executable.log`). The consolidated Unreal validator is `tools/validation/validate_product_unreal.ps1`, with optional `-SkipBuild` and `-PackagedExecutable`; creation of that script alone is not an additional executed result.
+
+Next: finish and run the actual standalone package; complete interactive flight/settings/session workflow; acquire/import/profile Electric Dreams; push the final reviewed source and verify both hosted CI jobs. Preserve unverified gamepad, host-specific and later-stage gates. This section supersedes the historical P0-only status below.
+
+## Historical P0 closeout (preserved)
+
 **Session date:** 2026-10-14 (Asia/Taipei)
 **Current host:** Machine B, Windows 11 Pro 24H2 x64, build 26100.9457.
-**Current phase:** P0. Windows local mandatory gates PASS; complete dual-platform P0 remains incomplete because Machine A still needs Python 3.12 and merged-source verification.
+**Historical phase at P0 closeout:** Windows local mandatory gates PASS; Machine A Python 3.12 was missing. See the current product/CI section above for subsequent work.
 
 ## Current Windows results
 
@@ -15,7 +51,7 @@
 | P0.6 local | PASS: original uavsim_smoke plus cpp20_smoke and invalid-argument test; information executable reports version 0.1.0; Python venv/import/filesystem smoke and pip checks PASS |
 | P0.7 local | PASS for actual sampled Windows build/Editor/scene observations; true idle baseline and exact process-tree peaks NOT_TESTED |
 | P0-A Mac | Prior C++/CTest evidence preserved below; Python 3.12 missing and merged source NOT_TESTED on Machine A |
-| Hosted CI | NOT_TESTED: push completed, but no hosted success was confirmed; connected commit status query returned no statuses and the workflow wrapper only lists PR-triggered runs |
+| Hosted CI (historical visibility) | Status had not been confirmed at this P0 closeout. The current section above records subsequently retrieved actual macOS PASS / Windows FAIL evidence |
 | Remote synchronization | PASS: implementation commit `436d1c7` pushed normally; `git ls-remote` matched local SHA `436d1c76b81dddde5710b11718cb6870917cf744`; remote history preserved |
 
 ## Changes and commands executed
@@ -43,7 +79,7 @@ Unreal measurements and limitations are in the final resource summary below. Fir
 
 Private detailed reports are ignored under `reports/environment`, `reports/validation`, `reports/performance`, `reports/unreal` and `reports/install`. Initial audits, failed attempts, bootstrap-only baselines and successful reports are preserved. The previous tracked Windows placeholder baseline is replaced by this sanitized summary; historical Mac reports remain unchanged.
 
-Next: request separate reboot approval after current work is saved; after reboot inspect WSL and complete the already-approved Ubuntu 22.04 installation and initialization. Resource limits (8 GB RAM / 4 GB swap) are proposals, not applied settings. Verify Mac Python 3.12 and the merged source independently. Do not begin flight dynamics or SITL installation in this task.
+Historical next actions at P0 closeout: obtain separate reboot approval, inspect WSL after reboot, complete approved Ubuntu 22.04 initialization and verify Machine A Python 3.12. Resource limits (8 GB RAM / 4 GB swap) were proposals, not applied settings. The subsequent user authorization expanded the task into product flight dynamics; current next gates are listed above.
 
 ## Governing plan
 

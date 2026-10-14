@@ -1,3 +1,5 @@
+> Current continuation (2026-10-14): Windows bootstrap gates are verified. Hosted macOS ARM64 passed P0 commit `0531568` with Python 3.12.10 and 3/3 CTests; its Windows CI job exposed a developer-script path quoting defect, repaired locally with a regression test. Machine A Python 3.12/current-source and the WSL reboot remain pending. The user subsequently authorized P1 and product Unreal work; see [PROJECT_STATUS.md](PROJECT_STATUS.md). The P0-only scope and historical host statuses below describe the original bootstrap session.
+
 <!-- Mac evidence imported from origin/main a7b3016; not rerun on Windows. Historical statuses below describe that prior host session. Current Windows results follow. -->
 # P0 Plan
 

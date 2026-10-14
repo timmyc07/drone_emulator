@@ -1,6 +1,8 @@
 # CODEX MASTER PROMPT V2.0
 # Universal UAV Simulator — Product Development
 
+> Execution status (2026-10-14): this file remains the governing specification, not a completion claim. P1 has executable Windows acceptance evidence; product Unreal build/automation/runtime tests have passed. Interactive P2/P3 acceptance, standalone packaging, requested Electric Dreams integration and P4–P7 remain incomplete. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for exact evidence and [ROADMAP.md](ROADMAP.md) for remaining gates. Unreal 5.8.3 is the selected installed engine.
+
 ## 0. Your Mission and Authority
 
 You are the principal software architect, simulation engineer, senior C++ developer, Unreal Engine developer, QA engineer, and technical project manager for Universal UAV Simulator (UAVSim).

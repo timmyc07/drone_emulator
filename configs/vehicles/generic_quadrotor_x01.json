@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "id": "generic-quadrotor-x01",
+  "name": "Generic Quadrotor X-01",
+  "category": "quadrotor",
+  "revision": "1",
+  "physics_backend": "uavsim-rk4",
+  "mass_kg": 1.5,
+  "inertia_kg_m2": [[0.025, 0, 0], [0, 0.025, 0], [0, 0, 0.045]],
+  "center_of_mass_m": [0, 0, 0],
+  "rotors": [
+    {"position_m": [0.2, 0.2, 0], "spin": 1, "k_thrust": 0.00001, "k_torque": 0.00000015, "max_speed_radps": 1000, "time_constant_s": 0.04},
+    {"position_m": [-0.2, 0.2, 0], "spin": -1, "k_thrust": 0.00001, "k_torque": 0.00000015, "max_speed_radps": 1000, "time_constant_s": 0.04},
+    {"position_m": [-0.2, -0.2, 0], "spin": 1, "k_thrust": 0.00001, "k_torque": 0.00000015, "max_speed_radps": 1000, "time_constant_s": 0.04},
+    {"position_m": [0.2, -0.2, 0], "spin": -1, "k_thrust": 0.00001, "k_torque": 0.00000015, "max_speed_radps": 1000, "time_constant_s": 0.04}
+  ],
+  "drag_area_coeff_m2": [0.08, 0.08, 0.12],
+  "angular_drag": 0.01,
+  "controls": {"max_tilt_rad": 0.5, "max_rate_radps": 2.0, "max_torque_nm": 1.0},
+  "asset_reference": "/Game/Drone/SM_DefaultDrone",
+  "provenance": {
+    "official": [],
+    "measured": [],
+    "engineering_estimates": ["All physical and control parameters are engineering estimates for a fictional reference quadrotor; no real aircraft fidelity is claimed.", "The user-provided visual drone model does not calibrate or establish the physical parameters."],
+    "unknown": ["Real propeller maps, motor constants, vibration, structural flexibility and battery behavior are not characterized."]
+  },
+  "assumptions": ["Rigid symmetric body; body FLU and world ENU; SI units.", "Four coplanar upward rotors, quadratic thrust/reaction torque, first-order motor lag.", "Simplified quadratic drag and ground contact; no battery or sensor model."],
+  "validation_status": "engineering_estimate"
+}

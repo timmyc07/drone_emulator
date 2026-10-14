@@ -1,4 +1,21 @@
-<!-- Mac evidence imported from origin/main a7b3016; not rerun on Windows. Historical statuses below describe that prior host session. Current Windows results follow. -->
+# Product implementation decisions — 2026-10-14
+
+The user authorized implementing the product beyond P0. Three parallel preimplementation reviews covered current official compatibility, existing code/failure risks and project maintenance/acceptance. Additional focused reviews preceded the Windows CI quoting repair, replay validation and closeout script correction. Only reviewed changes above the required confidence threshold were applied; passing builds are still required separately.
+
+- Keep one portable C++20 dynamics implementation, compiled by both CMake and the Unreal plugin. Physics uses SI/ENU/FLU, Hamilton body-to-world quaternions and a 0.004 s fixed step. Unreal only converts/interpolates snapshots; Chaos cannot also move the vehicle. Game-thread ownership avoids unsynchronized cross-thread state.
+- Reuse Eigen, nlohmann/json and PicoSHA2 instead of writing matrix decomposition, a JSON parser or a cryptographic hash. Preserve pinned source and notices. GitHub research also evaluated Project AirSim and JSBSim; importing their full platform/backend stacks is unnecessary for the first self-contained quadrotor, and their broader capabilities are not claimed implemented.
+- Validate complete positive-definite inertia and rotor allocation, reject nonfinite state/configuration, and stage a step before publishing it. Controllers and motor lag generate movement through dynamics. Ground contact is a documented flat, inelastic approximation; scenery does not imply terrain collision fidelity.
+- Require vehicle provenance, assumptions and exact-byte SHA256. Treat the user-provided visual drone as cosmetic, with physical properties explicitly estimated. Keep external raw assets local pending their redistribution terms.
+- Distinguish headless input re-execution (version/hash/timestep checks and trajectory comparison) from desktop recorded-state playback. Use explicit format/schema versions and reject malformed/corrupt data; do not describe state playback as deterministic simulation.
+- Retain the P0 fixture unchanged in purpose; product implementation lives under `unreal/UAVSim`. Test the lightweight environment first, then complete the user's requested Electric Dreams environment and profile its actual resource use.
+- Repair Windows hosted CI by preserving raw `cmd` quoting in a process-local developer-environment helper. Regressions cover spaces/parentheses, child isolation and nonzero exit. Action v7 versions were proven valid by the actual hosted run; changing them would not fix the path bug.
+- A validation script containing expected native failures must explicitly `exit 0` only after all checks and transcript cleanup succeed. PowerShell otherwise leaves the final native rejection in `$LASTEXITCODE`, misleading wrappers. Exceptions still skip the success exit. This follows [PowerShell's exit-code semantics](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_automatic_variables#lastexitcode) and [upstream discussion](https://github.com/MicrosoftDocs/PowerShell-Docs/issues/9194).
+
+P1 Windows evidence does not complete the whole product. Final interactive operation, packaged launch, Electric Dreams, real gamepad hardware, current cross-platform CI and P4–P7 remain independently tracked. Earlier P0-only restrictions below document the earlier session, not a ban on the subsequently authorized product work.
+
+## Historical bootstrap decisions
+
+<!-- Mac evidence imported from origin/main a7b3016; not rerun on Windows. -->
 # Decisions
 
 - The core remains a headless C++20 CMake target so Unreal is optional for P0 core CI.

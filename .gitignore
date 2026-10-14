@@ -35,3 +35,10 @@ CMakeUserPresets.json
 *.user
 unreal/P0Probe/Content/
 unreal/P0Probe/Config/DefaultInput.ini
+
+# User-owned sample content, model sources and product build outputs
+local-assets/
+dist/
+unreal/UAVSim/Content/
+unreal/UAVSim/Config/DefaultInput.ini
+unreal/UAVSim/Config/Vehicles/

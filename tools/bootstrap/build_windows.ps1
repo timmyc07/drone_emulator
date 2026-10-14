@@ -9,8 +9,8 @@ $vs = & $vswhere -latest -products '*' -version '[17.0,18.0)' -requires Microsof
 if (-not $vs) { throw 'VS2022 x64 C++ tools are missing; installer changes require approval.' }
 $developer = Join-Path $vs 'Common7/Tools/VsDevCmd.bat'
 # Import environment into this process only; preserve all machine/user settings.
-$lines = & $env:ComSpec /d /s /c "`"`"$developer`" -arch=x64 -host_arch=x64 >nul && set`""
-if ($LASTEXITCODE -ne 0) { throw 'Developer environment setup failed.' }
+. "$PSScriptRoot/vs_environment.ps1"
+$lines = Get-VsEnvironmentLines $developer
 foreach ($line in $lines) {
     if ($line -match '^([^=]+)=(.*)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') }
 }

@@ -1,4 +1,23 @@
-<!-- Mac evidence imported from origin/main a7b3016; not rerun on Windows. Historical statuses below describe that prior host session. Current Windows results follow. -->
+# Current product dependencies — 2026-10-14
+
+The portable C++20 core is separate from Unreal and has no package download at build time. Reused, pinned source dependencies and original license files are retained under `third_party`; their licenses do not replace the product or asset licenses.
+
+| Dependency | Exact version/revision | License/use |
+| --- | --- | --- |
+| Eigen | 5.0.0, `549bf8c75b6aae071cde2f28aa48f16ee3ae60b0` | MPL-2.0, retained COPYING notices; vectors/quaternions, inertia and allocation solves |
+| nlohmann/json | 3.12.0 | MIT; strict vehicle/recording parsing and metadata |
+| PicoSHA2 | `161cb3fc4170fa7a3eca9e582cebd27cc4d1fe29` | MIT; exact configuration-byte SHA256 |
+| CMake / CTest | Minimum 3.20; Windows installed 3.31.6-msvc6 | Existing build/test system; no external test framework required |
+| Unreal Engine | Installed 5.8.3 | Existing Epic license; product C++ plugin/UMG/rendering, separate from portable core |
+| GitHub Actions | checkout/setup-python/upload-artifact v7 | Actual v7 execution confirmed in P0 run 38536058546; Windows environment quoting failure was unrelated to action versions |
+
+See [third-party provenance](../third_party/README.md) for official sources, archive/header checksums and notices. No JSBSim, PX4, ArduPilot, ROS, geospatial or GPU simulation backend is installed or claimed integrated. Electric Dreams is requested content currently being acquired; its original license/entitlement and resource requirements apply. User-supplied drone assets have been imported locally but redistribution remains unverified; see [ASSETS.md](ASSETS.md).
+
+Windows builds and physics/config tests passed with these dependencies. Hosted macOS P0 passed with Apple Clang 15/Python 3.12.10, but the new vendored P1 core still needs a current-source hosted result. No new Machine A installation is claimed.
+
+## Historical P0 host inventory
+
+<!-- Mac evidence imported from origin/main a7b3016; not rerun on Windows. Historical statuses below describe that prior host session. -->
 # Dependencies
 
 ## Machine A (verified in prior Mac session)
