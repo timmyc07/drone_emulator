@@ -15,8 +15,8 @@
 | P0.6 local | PASS: original uavsim_smoke plus cpp20_smoke and invalid-argument test; information executable reports version 0.1.0; Python venv/import/filesystem smoke and pip checks PASS |
 | P0.7 local | PASS for actual sampled Windows build/Editor/scene observations; true idle baseline and exact process-tree peaks NOT_TESTED |
 | P0-A Mac | Prior C++/CTest evidence preserved below; Python 3.12 missing and merged source NOT_TESTED on Machine A |
-| Hosted CI | NOT_TESTED pending push and an actual hosted run; configured Windows x64 and macOS ARM64 jobs |
-| Remote synchronization | Existing remote history adopted and preserved; final commit/push verification pending |
+| Hosted CI | NOT_TESTED: push completed, but no hosted success was confirmed; connected commit status query returned no statuses and the workflow wrapper only lists PR-triggered runs |
+| Remote synchronization | PASS: implementation commit `436d1c7` pushed normally; `git ls-remote` matched local SHA `436d1c76b81dddde5710b11718cb6870917cf744`; remote history preserved |
 
 ## Changes and commands executed
 
@@ -27,6 +27,7 @@
 - Core script executed `cmake --preset windows-x64-debug`, `cmake --build --preset windows-x64-debug`, and `ctest --preset windows-x64-debug` after importing only process-local VS developer settings. Corrected the prior Ninja single-config executable path.
 - Unreal used `Build.bat P0ProbeEditor Win64 Development -Project=... -MaxParallelActions=2`, then Editor automation with JSON report inspection and separate DX12 game/editor runs. Lightweight generated cube level, 1920x1080 development resolution, Medium scalability groups, disabled Lumen/ray tracing.
 - Checked all PowerShell syntax, preset/project JSON, original-source preservation, ignore rules and Git whitespace. Mac shell scripts retain their executable Git modes; their updated execution remains unverified on Machine A.
+- Disabled the unused AndroidFileServer plugin in the isolated fixture, excluded Editor-generated input defaults, and reran the focused Editor level/actor automation test against the final configuration: PASS. Only intentional project settings were committed.
 
 ## Recovery evidence
 
