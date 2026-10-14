@@ -15,6 +15,8 @@ node tools/web/serve.mjs
 
 Open `http://127.0.0.1:4173/`. The server exposes only prepared `dist/web` files. Do not start a generic static server from the repository root or publish the local drone assets; their redistribution license is unverified.
 
+Do not double-click `index.html` or use a `file://` address: browsers block the ES-module, WebAssembly and asset fetches required by the game. The page now explains this directly and remains disabled until it is opened through the loopback server above.
+
 ## Core validation
 
 Run the native core checks on the matching host:

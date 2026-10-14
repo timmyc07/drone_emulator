@@ -19,6 +19,8 @@ node tools/web/serve.mjs
 
 Open `http://127.0.0.1:4173/` in the browser. The server exposes only the assembled `dist/web` output and binds to loopback. Source/configuration outside that output is not part of the served tree. The server is a local development/delivery helper, with no hosted publication or machine-wide installation.
 
+Do not open `web/index.html` or `dist/web/index.html` using `file://`. Browsers block the module, WebAssembly and asset fetches used by this game. The direct-file page deliberately stops before loading the application and displays the same loopback-server command instead of a generic `Failed to fetch` error.
+
 The frontend source is under `web/`; the build copies its known files, generated WebAssembly, approved vendor files, vehicle configuration and local drone assets into ignored `dist/web`. Preflight checks required files and types, including the pinned Three.js import dependencies, before touching the existing output. Do not run a generic static server from the repository root. Rebuild the output after source or configuration changes.
 
 ## Assets and delivery boundaries

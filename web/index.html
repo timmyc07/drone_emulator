@@ -46,6 +46,22 @@
     <input id="replay-file" type="file" accept="application/json,.json" hidden>
     <footer class="footer-note">UAVSIM <span>Browser Edition</span><span id="engine-status">核心準備中</span></footer>
   </main>
-  <script type="module" src="./app.js"></script>
+  <script>
+    if (location.protocol === 'file:') {
+      const status = document.getElementById('load-status');
+      const start = document.getElementById('start');
+      status.textContent = '無法直接開啟此檔案。請在專案目錄執行 node tools/web/serve.mjs，然後開啟 http://127.0.0.1:4173/。';
+      status.classList.add('error');
+      start.textContent = '請使用本機伺服器';
+      start.disabled = true;
+      document.getElementById('engine-status').textContent = '需要本機伺服器';
+      console.warn('[UAVSim] Direct file launch blocked; use the loopback server.');
+    } else {
+      const app = document.createElement('script');
+      app.type = 'module';
+      app.src = './app.js';
+      document.body.append(app);
+    }
+  </script>
 </body>
 </html>

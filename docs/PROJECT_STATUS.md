@@ -139,6 +139,13 @@ Historical next actions at P0 closeout included a separately approved reboot, WS
 - PASS: `node tools/web/server.test.mjs` passed outside the restricted sandbox after its temporary-directory `realpath` access was blocked inside it; this validates the loopback HTTP/path/MIME boundary.
 - NOT_TESTED: browser completion of SIM-006, non-embedded browser engines, physical gamepad/touch, real aircraft/platform physics, production geofence/RF/sensor behavior, and CI.
 
+## Direct-file launch UX — 2026-10-14
+
+- IMPLEMENTED: a `file://` guard runs before the app module, WASM or assets are loaded. It disables Start and gives the exact loopback launch command instead of surfacing the browser's opaque `Failed to fetch` error.
+- PASS (source regression): `node web/file-protocol.test.mjs` validates that the guard precedes conditional module injection and retains the loopback recovery instruction.
+- PASS: rebuilt `http://127.0.0.1:4173/` loaded in the local in-app browser with the supplied model, all six textures, enabled Start button and `C++ / WASM · 250 Hz` status.
+- NOT_TESTED: fresh automated browser observation of the corrected `file://` page; the browser automation policy denies `file:` page access, and no bypass was attempted.
+
 ## Prior Machine A session (historical, imported from a7b3016)
 
 The following is the original Mac status record. Its Windows/CI NOT_TESTED statements described that earlier session; the Windows results above supersede them. These Mac results were not rerun from this host, and Python 3.9.6 does not satisfy the target 3.12 requirement.
