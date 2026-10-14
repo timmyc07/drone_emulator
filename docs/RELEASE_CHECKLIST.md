@@ -13,8 +13,9 @@ The user replaced the desktop delivery target with a browser game. The earlier d
 - [x] Verify local server traversal rejection, supported methods, missing files and JavaScript/WebAssembly MIME types; expose only prepared `dist/web` on loopback.
 - [x] Preserve pinned dependency licenses in prepared output; eight core files and Three.js LICENSE match SHA256. Ignore checks cover user assets/generated bundles.
 - [x] Run affected native regressions: Windows 6/6 CTests PASS in `reports/web-native-regression.log`.
-- [ ] Record new hosted CI separately from historical commit `7f21881c1b8adbe252f74793250bbb262b1df49b`.
-- [ ] Record exact browser/tool versions and actual evidence in [PROJECT_STATUS.md](PROJECT_STATUS.md), then commit/push source and documentation.
+- [x] Browser-source commit `9ac524a9be891a6fc26cfc71d61ee55442745763` passed Windows and macOS native core CI in [run 38550487896](https://github.com/timmyc07/drone_emulator/actions/runs/38550487896); browser acceptance remains separately captured locally.
+- [x] Record actual tool versions/evidence in [PROJECT_STATUS.md](PROJECT_STATUS.md), and commit/push browser source and documentation.
+- [ ] Capture exact browser build numbers; current observations identify Chrome and the Codex in-app browser only.
 
 Commands and limitations are in [WEB_GAME.md](WEB_GAME.md). Unchecked items are not PASS.
 
