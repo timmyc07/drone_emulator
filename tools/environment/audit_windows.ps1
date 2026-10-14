@@ -1,0 +1,4 @@
+$ErrorActionPreference = 'SilentlyContinue'
+function ToolVersion($name, $args=@('--version')) { $cmd = Get-Command $name; if ($cmd) { (& $name @args 2>&1 | Select-Object -First 1) } else { $null } }
+$result = [ordered]@{ status='NOT_TESTED'; host='windows-audit'; system=[ordered]@{ os='Windows'; version=(Get-CimInstance Win32_OperatingSystem).Version; architecture=$env:PROCESSOR_ARCHITECTURE; cpu=(Get-CimInstance Win32_Processor).Name; logical_processors=(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors; memory_bytes=(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory }; development=[ordered]@{ git=(ToolVersion git); cmake=(ToolVersion cmake); ninja=(ToolVersion ninja); python=(ToolVersion python); cl=(ToolVersion cl); wsl=(ToolVersion wsl @('--status')) } }
+$result | ConvertTo-Json -Depth 5
