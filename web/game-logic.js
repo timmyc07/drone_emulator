@@ -22,13 +22,23 @@ export function gamepadFlightInput(gamepad, sensitivity) {
   if (!gamepad) return {roll:0, pitch:0, yaw:0, climb:0};
   const axis = index => deadzone(gamepad.axes?.[index] ?? 0);
   const button = index => clamp(gamepad.buttons?.[index]?.value ?? 0, 0, 1);
-  return {roll:axis(0)*sensitivity, pitch:-axis(1)*sensitivity, yaw:axis(2)*sensitivity, climb:button(7)-button(6)};
+  const rightHorizontal = axis(2);
+  // A few browser/DirectInput combinations report the right-stick horizontal
+  // channel as axis 3. Standard mapping remains axis 2; use axis 3 only when
+  // it is the active candidate.
+  const fallbackHorizontal = axis(3);
+  const yaw = Math.abs(rightHorizontal) >= Math.abs(fallbackHorizontal) ? rightHorizontal : fallbackHorizontal;
+  return {roll:axis(0)*sensitivity, pitch:-axis(1)*sensitivity, yaw:yaw*sensitivity, climb:button(7)-button(6)};
 }
 export function mergeFlightInput(...inputs) {
   return inputs.reduce((result, input) => ({
     roll:clamp(result.roll + input.roll, -1, 1), pitch:clamp(result.pitch + input.pitch, -1, 1),
     yaw:clamp(result.yaw + input.yaw, -1, 1), climb:clamp(result.climb + input.climb, -1, 1)
   }), {roll:0, pitch:0, yaw:0, climb:0});
+}
+export function prioritizeManualFlightInput(manual, automatic) {
+  const select = axis => Math.abs(manual[axis]) > 0 ? manual[axis] : automatic[axis];
+  return {roll:select('roll'), pitch:select('pitch'), yaw:select('yaw'), climb:manual.climb};
 }
 // Gates face east, matching the initial body +X heading. Crossing is forward-only.
 export function crossedGate(previous, current, gate, radius = 2.2) {

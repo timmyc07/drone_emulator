@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { STEP, GATES, SCENARIOS, clamp, controls, crossedGate, gamepadFlightInput, mergeFlightInput, scenarioById, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
+import { STEP, GATES, SCENARIOS, clamp, controls, crossedGate, gamepadFlightInput, mergeFlightInput, prioritizeManualFlightInput, scenarioById, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
 import { isMissionScenario } from './scenario-definitions.js';
 import { advanceMission, approveMission, createMissionRun, estimatedPosition, guidanceInput, missionMetrics, missionReport, missionTarget } from './mission-engine.js';
 
@@ -297,7 +297,7 @@ function updateSimulation(delta) {
     setCoreEnvironment(missionRun.wind_mps);
     if(autoMission&&missionRun.phase!=='PREFLIGHT') {
       const target=missionTarget(missionRun,scenario), guidance=guidanceInput(state,target,estimatedPosition(missionRun,state));
-      input=mergeFlightInput(input,{roll:guidance.roll,pitch:guidance.pitch,yaw:guidance.yaw,climb:0});targetAltitude=guidance.altitude_m;
+      input=prioritizeManualFlightInput(input,{roll:guidance.roll,pitch:guidance.pitch,yaw:guidance.yaw});targetAltitude=guidance.altitude_m;
     } else targetAltitude=clamp(targetAltitude+input.climb*2.5*steps*STEP,0,50);
   } else targetAltitude=clamp(targetAltitude+input.climb*2.5*steps*STEP,0,50);
   check(core.setInput(armed,2,input.roll,input.pitch,input.yaw,.5,targetAltitude));

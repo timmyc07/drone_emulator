@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { SCENARIOS, controls, crossedGate, deadzone, gamepadFlightInput, mergeFlightInput, scenarioById, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
+import { SCENARIOS, controls, crossedGate, deadzone, gamepadFlightInput, mergeFlightInput, prioritizeManualFlightInput, scenarioById, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
 assert.deepEqual(toRenderPosition([2, 3, 4]), [2, 4, -3]);
 assert.deepEqual(toRenderQuaternion([.5, .5, .5, .5]), [.5, .5, -.5, .5]);
 assert.deepEqual(controls(new Set(['KeyW', 'KeyD', 'KeyQ', 'Space']), .5), {roll:.5, pitch:.5, yaw:.5, climb:1});
@@ -10,7 +10,9 @@ assert.ok(deadzone(.5) > 0 && deadzone(-.5) < 0);
 const gamepadInput = gamepadFlightInput({axes:[.5,-.5,.5],buttons:[{value:0},{value:0},{value:0},{value:0},{value:0},{value:0},{value:.2},{value:.8}]}, 1);
 assert.equal(gamepadInput.roll, deadzone(.5)); assert.equal(gamepadInput.pitch, deadzone(.5)); assert.equal(gamepadInput.yaw, deadzone(.5)); assert.ok(Math.abs(gamepadInput.climb-.6) < Number.EPSILON);
 assert.deepEqual(gamepadFlightInput({mapping:'vendor-specific',axes:[1,1,1],buttons:[]},1), {roll:1,pitch:-1,yaw:1,climb:0});
+assert.equal(gamepadFlightInput({axes:[0,0,0,.6],buttons:[]},1).yaw, deadzone(.6));
 assert.deepEqual(mergeFlightInput({roll:.8,pitch:0,yaw:0,climb:0},{roll:.8,pitch:.2,yaw:-.2,climb:-.3}), {roll:1,pitch:.2,yaw:-.2,climb:-.3});
+assert.deepEqual(prioritizeManualFlightInput({roll:0,pitch:0,yaw:-.6,climb:0},{roll:.2,pitch:-.3,yaw:.4}), {roll:.2,pitch:-.3,yaw:-.6,climb:0});
 assert.equal(SCENARIOS.length, 12);
 assert.equal(scenarioById('sim-001').code, 'SIM-001');
 assert.equal(scenarioById('unknown').id, 'sim-001');

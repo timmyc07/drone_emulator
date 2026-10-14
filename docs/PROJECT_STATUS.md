@@ -206,3 +206,10 @@ Measured after applying all Medium scalability groups. Durations include process
 - BLOCKED (sandbox): `node tools/web/server.test.mjs` cannot use `realpath` in the restricted sandbox. The project-local loopback server ran outside it and served only `dist/web` for this browser check.
 - BLOCKED (native rebuild): the restricted build could not start MSVC's program database manager; outside the sandbox the bare compiler environment lacked the standard C++ include paths (`cmath`). Existing CTest executables report 6/6 PASS but predate this source change, so they are not evidence for this repair. The actual Emscripten C++ build and WebAssembly executions above are current evidence.
 - NOT_TESTED: physical gamepad hardware, nonstandard-device physical axis layout, other browser engines, macOS, and hosted CI.
+
+## Right-stick manual-priority repair — 2026-10-14
+
+- IMPLEMENTED: during an automatic mission, nonzero manual roll, pitch, or yaw takes priority on that axis; releasing it returns only that axis to route guidance. This prevents route yaw from cancelling a right-stick turn command.
+- IMPLEMENTED: controller input also supports an axis-3 right-stick-horizontal fallback for browser/DirectInput layouts that do not expose the standard axis-2 channel.
+- PASS: focused JavaScript tests passed and `dist/web` was rebuilt; the already open local game was reloaded and reached `指定模型與 6 張貼圖已就緒` / `C++ / WASM · 250 Hz`.
+- NOT_TESTED: the user's physical right-stick turn response after this reload; browser automation cannot observe the browser Gamepad API on this surface.
