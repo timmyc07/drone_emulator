@@ -24,3 +24,6 @@
 ## Next executable task
 
 Run `docs/WINDOWS_CONTINUATION.md` on Machine B, then trigger CI and attach its actual logs.
+## Primary plan
+
+The governing product plan is [CODEX MASTER PROMPT V2.0](MASTER_PLAN.md).
