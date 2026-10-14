@@ -3,7 +3,7 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { STEP, GATES, SCENARIOS, clamp, controls, crossedGate, gamepadFlightInput, mergeFlightInput, scenarioById, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
 import { isMissionScenario } from './scenario-definitions.js';
-import { advanceMission, createMissionRun, estimatedPosition, guidanceInput, missionMetrics, missionReport, missionTarget } from './mission-engine.js';
+import { advanceMission, approveMission, createMissionRun, estimatedPosition, guidanceInput, missionMetrics, missionReport, missionTarget } from './mission-engine.js';
 
 const $ = id => document.getElementById(id);
 const log = (event, detail = '') => console.info(`[UAVSim] ${event}`, detail);
@@ -343,12 +343,14 @@ function updateHud() {
     $('subsystem-state').textContent=`LINK ${missionRun.link_quality_pct.toFixed(0)}% · GNSS ±${missionRun.gnss_error_m.toFixed(1)}m · ${missionRun.sensorMode} · ${missionRun.temperature_c.toFixed(0)}°C`;
     $('metric-state').textContent=`航點 ${metrics.waypoint_completion_pct.toFixed(0)}% · 資料 ${metrics.data_valid_pct.toFixed(0)}% · 鏈路 ${metrics.link_availability_pct.toFixed(0)}%`;
     $('auto-mission').innerHTML=`${autoMission?'自動任務 ON':'自動任務 OFF'} <kbd>M</kbd>`;$('auto-mission').hidden=false;
+    $('approve-takeoff').hidden=!scenario.requiresHumanApproval||missionRun.humanApproved;$('approve-takeoff').disabled=!!playback;
     $('mission-report').disabled=false;
   } else if(mode==='course' && gateIndex<GATES.length) {
+    $('approve-takeoff').hidden=true;
     const distance=Math.hypot(...toRenderPosition(state.position_m).map((v,i)=>v-GATES[gateIndex][i]));
     $('mission-hint').textContent=`距離 ${distance.toFixed(0)} m · 目標高度 ${GATES[gateIndex][1]} m`;
     $('auto-mission').hidden=true;
-  } else {$('mission-hint').textContent=playback?'重現已記錄的飛行狀態':`${scenario.briefing} · ${scenario.condition}`;$('auto-mission').hidden=true;}
+  } else {$('mission-hint').textContent=playback?'重現已記錄的飛行狀態':`${scenario.briefing} · ${scenario.condition}`;$('auto-mission').hidden=true;$('approve-takeoff').hidden=true;}
 }
 function updateView(delta) {
   if(!state)return;
@@ -388,7 +390,9 @@ $('reset').onclick=restart;$('pause-reset').onclick=restart;
 function toggleCamera(){cameraMode=cameraMode==='chase'?'fpv':'chase';$('camera').innerHTML=`${cameraMode==='chase'?'追蹤視角':'第一人稱'} <kbd>C</kbd>`;if(cameraMode==='chase'&&document.pointerLockElement===renderer.domElement)document.exitPointerLock();}
 $('camera').onclick=toggleCamera;
 function toggleAutoMission(){if(!missionRun||playback)return;autoMission=!autoMission;notify(autoMission?'自動任務控制已啟用':'自動任務控制已關閉；由您接管飛行');log('Mission control changed',autoMission);}
+function approveTakeoff(){if(!missionRun||playback||missionRun.humanApproved)return;missionRun=approveMission(missionRun,scenario);notify('人工核准已記錄。');log('Mission approved',{scenario:scenario.id});refreshGates();}
 $('auto-mission').onclick=toggleAutoMission;$('mission-report').onclick=exportMissionReport;
+$('approve-takeoff').onclick=approveTakeoff;
 $('settings-open').onclick=()=>openDialog('settings-dialog');$('help-open').onclick=()=>openDialog('help-dialog');$('help-flight').onclick=()=>openDialog('help-dialog');
 $('save-session').onclick=exportSession;$('save-csv').onclick=exportCsv;
 $('replay-open').onclick=()=>{if(ready)$('replay-file').click();else notify('請等待資源載入完成。');};
@@ -411,7 +415,7 @@ addEventListener('keydown',event=>{
   }
   if(flightKeys.has(event.code)){event.preventDefault();if(running&&!playback)keys.add(event.code);return;}
   if(event.repeat)return;
-  const actions={KeyP:()=>pause(),KeyF:toggleArmed,KeyR:restart,KeyC:toggleCamera,KeyM:toggleAutoMission,Escape:()=>pause()};
+  const actions={KeyP:()=>pause(),KeyF:toggleArmed,KeyR:restart,KeyC:toggleCamera,KeyM:toggleAutoMission,KeyV:approveTakeoff,Escape:()=>pause()};
   if(actions[event.code]){event.preventDefault();actions[event.code]();}
 });
 addEventListener('keyup',event=>keys.delete(event.code));

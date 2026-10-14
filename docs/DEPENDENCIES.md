@@ -96,3 +96,5 @@ No dependency added. Mouse look uses the browser Pointer Lock API; controller in
 # Mission scenario dependencies — 2026-10-14
 
 No dependency added. The mission definitions and state machine use project JavaScript modules; live wind uses the existing C++ core through the Emscripten binding. PX4, ArduPilot, QGroundControl and JSBSim were research references only and are not linked, vendored or claimed integrated.
+
+SIM-006–SIM-010 reuse that same dependency boundary. Their procedure semantics were checked against [PX4 Return mode](https://docs.px4.io/main/en/flight_modes/return) and [PX4 safety configuration](https://docs.px4.io/main/en/config/safety), plus the PX4, ArduPilot and QGroundControl GitHub implementations; no upstream source code, telemetry service or aircraft simulator was imported.

@@ -130,6 +130,15 @@ Historical next actions at P0 closeout included a separately approved reboot, WS
 
 [CODEX MASTER PROMPT V2.0](MASTER_PLAN.md) remains unchanged. The user's explicit UE 5.8 selection supersedes the earlier 5.7 target for this environment verification.
 
+## Browser SIM-006–SIM-010 update — 2026-10-14
+
+- PASS: `node --test web/game-logic.test.mjs web/mission-engine.test.mjs` — 2/2, including ten definitions, approval gates, safety audits and non-weapon negative checks.
+- PASS: `node tests/mission_wasm.mjs` — all ten deterministic missions completed against the actual C++/WebAssembly core and were grounded; SIM-006/007/008/009/010 completed at 32.09/31.66/23.93/31.52/36.90 s.
+- PASS: `node tools/web/build-site.test.mjs` and `node tools/web/build-site.mjs` — output preflight passed and `dist/web` was rebuilt.
+- PASS: local in-app browser loaded the rebuilt site, rendered the supplied model/material, showed SIM-006 `AWAITING_APPROVAL`, accepted 「核准起飛」, and visibly reached `PATROL` with live telemetry.
+- PASS: `node tools/web/server.test.mjs` passed outside the restricted sandbox after its temporary-directory `realpath` access was blocked inside it; this validates the loopback HTTP/path/MIME boundary.
+- NOT_TESTED: browser completion of SIM-006, non-embedded browser engines, physical gamepad/touch, real aircraft/platform physics, production geofence/RF/sensor behavior, and CI.
+
 ## Prior Machine A session (historical, imported from a7b3016)
 
 The following is the original Mac status record. Its Windows/CI NOT_TESTED statements described that earlier session; the Windows results above supersede them. These Mac results were not rerun from this host, and Python 3.9.6 does not satisfy the target 3.12 requirement.

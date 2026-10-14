@@ -34,7 +34,7 @@ Browser-specific checks and captured evidence are documented in [WEB_GAME.md](do
 - [Assets and licensing](docs/ASSETS.md)
 - [Dependencies](docs/DEPENDENCIES.md)
 - [Engineering decisions](docs/DECISIONS.md)
-- [Mission scenarios SIM-001–SIM-005](docs/SCENARIOS.md)
+- [Mission scenarios SIM-001–SIM-010](docs/SCENARIOS.md)
 - [Roadmap](docs/ROADMAP.md)
 
 The former Unreal desktop application and its Unreal-specific build, package and validation tools have been retired. Historical acceptance evidence remains in the project records and local `reports/` directory.

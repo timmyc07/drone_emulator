@@ -68,3 +68,11 @@ Default camera is first-person. Pointer Lock and browser Gamepad API are used wi
 # Mission scenario follow-up — 2026-10-14
 
 SIM-001–SIM-005 now have executable deterministic mission mechanics rather than briefing-only tags. Wind reaches the C++ core; navigation, communications, payload, energy and thermal behavior are documented abstract models. Browser SIM-001 completed end-to-end. Platform-specific flight models and physical gamepad verification remain separate gates; local native rebuild is BLOCKED by MSVC C1902.
+
+## SIM-006–SIM-010 delivery — 2026-10-14
+
+- PASS: ten deterministic mission definitions, including three explicit human-approval preflight gates, safety-state audit records and deny-by-default non-weapon interface checks.
+- PASS: Node unit tests and actual C++/WebAssembly runs completed all ten definitions with grounded recovery.
+- PASS: rebuilt local `dist/web` rendered the supplied model and SIM-006 accepted the human approval control before entering patrol.
+- PASS: `node tools/web/server.test.mjs` passed outside the restricted sandbox after its temporary-directory `realpath` access was blocked inside it; the test exercises loopback-only HTTP/path/MIME boundaries.
+- NOT_TESTED: authenticated remote CI, non-embedded browser engine, physical controls, real fixed-wing/VTOL/UCAV flight, operational fences or sensors.
