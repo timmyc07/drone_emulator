@@ -38,7 +38,9 @@ struct VehicleConfig {
     double angular_drag = 0.01;
     double max_tilt_rad = 0.5;
     double max_rate_radps = 2.0;
-    double max_torque_nm = 1.0;
+    // Tuned below the instantaneous mixer authority so altitude hold retains
+    // enough thrust while the rate loop corrects attitude.
+    double max_torque_nm = 0.15;
 };
 VehicleConfig reference_quadrotor();
 void validate_config(const VehicleConfig& config);
@@ -104,6 +106,9 @@ public:
     double timestep() const { return dt_; }
     const VehicleConfig& config() const { return config_; }
     const Environment& environment() const { return environment_; }
+    // Preserve collective thrust first, then scale the requested torque uniformly to
+    // the motor-feasible wrench set. This avoids per-motor clipping changing the
+    // direction of the requested attitude correction.
     std::array<double, 4> allocate(double thrust_n, const Vec3& torque_nm) const;
     std::array<double, 4> hover_rotor_speeds() const;
 private:

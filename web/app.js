@@ -291,7 +291,7 @@ function updateSimulation(delta) {
   accumulator+=delta;
   const steps=Math.min(64,Math.floor(accumulator/STEP));
   if(!steps)return;
-  const gamepad = gamepadIndex === null ? [...navigator.getGamepads()].find(Boolean) : navigator.getGamepads()[gamepadIndex];
+  const gamepad = selectedGamepad();
   let input=mergeFlightInput(controls(keys,settings.sensitivity),gamepadFlightInput(gamepad,settings.sensitivity));
   if(missionRun) {
     setCoreEnvironment(missionRun.wind_mps);
@@ -427,6 +427,22 @@ document.querySelectorAll('[data-key]').forEach(button=>{
   button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
 });
 function gamepadPressed(gamepad, button) { return !!gamepad.buttons?.[button]?.pressed; }
+function gamepadIsActive(gamepad) {
+  return gamepad.axes?.some(axis => Math.abs(axis) > .18) || gamepad.buttons?.some(button => button.value > .18);
+}
+function selectedGamepad() {
+  const connected = [...navigator.getGamepads()].filter(Boolean);
+  if (!connected.length) { gamepadIndex = null; return null; }
+  // Prefer the device the player is actually moving. This also recovers from a
+  // controller that was unplugged without a disconnect event reaching the page.
+  const active = connected.find(gamepadIsActive);
+  const selected = active ?? connected.find(gamepad => gamepad.index === gamepadIndex) ?? connected[0];
+  if (gamepadIndex !== selected.index) {
+    gamepadIndex = selected.index;
+    log('Gamepad selected',{index:selected.index,id:selected.id,mapping:selected.mapping || 'compatibility'});
+  }
+  return selected;
+}
 function updateGamepads() {
   for (const gamepad of navigator.getGamepads()) {
     if (!gamepad) continue;
@@ -441,7 +457,7 @@ function updateGamepads() {
     gamepadButtons.set(gamepad.index, current);
   }
 }
-addEventListener('gamepadconnected', event => { gamepadIndex ??= event.gamepad.index; log('Gamepad connected',{index:event.gamepad.index,id:event.gamepad.id,mapping:event.gamepad.mapping}); notify('手把已連線：左搖桿飛行、右搖桿左右轉向、扳機升降。'); });
+addEventListener('gamepadconnected', event => { gamepadIndex ??= event.gamepad.index; log('Gamepad connected',{index:event.gamepad.index,id:event.gamepad.id,mapping:event.gamepad.mapping || 'compatibility'}); notify('手把已連線：左搖桿飛行、右搖桿左右轉向、扳機升降。'); });
 addEventListener('gamepaddisconnected', event => { gamepadButtons.delete(event.gamepad.index); if(gamepadIndex===event.gamepad.index)gamepadIndex=null; log('Gamepad disconnected',event.gamepad.index); });
 
 async function init() {

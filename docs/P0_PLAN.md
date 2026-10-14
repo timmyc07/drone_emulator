@@ -76,3 +76,9 @@ SIM-001–SIM-005 now have executable deterministic mission mechanics rather tha
 - PASS: rebuilt local `dist/web` rendered the supplied model and SIM-006 accepted the human approval control before entering patrol.
 - PASS: `node tools/web/server.test.mjs` passed outside the restricted sandbox after its temporary-directory `realpath` access was blocked inside it; the test exercises loopback-only HTTP/path/MIME boundaries.
 - NOT_TESTED: authenticated remote CI, non-embedded browser engine, physical controls, real fixed-wing/VTOL/UCAV flight, operational fences or sensors.
+
+## Browser control repair follow-up — 2026-10-14
+
+- Complete: retain the C++20/WASM boundary; repair input normalization and mixer behavior without importing PX4, ArduPilot or a simulator dependency.
+- Complete: verify JavaScript semantics, WebAssembly smoke, all executable mission proxies, bundle assembly, and a local rendered-model/interaction session. The current native MSVC rebuild needs the existing developer environment and remains blocked by the restricted session.
+- Outstanding: physically test one standard-mapped and one compatibility-mapped gamepad, recording browser/device/version and observed axis mapping. Do not claim either hardware class until that evidence exists.

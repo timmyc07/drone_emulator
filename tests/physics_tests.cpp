@@ -118,6 +118,20 @@ void mixing_and_motors() {
     }
     for (double command : sim.allocate(1e6, Vec3(100, -100, 100)))
         check(command >= 0 && command <= 1, "motor command saturation");
+    // Saturation keeps collective authority and does not reverse an attitude request
+    // through independent per-motor clipping.
+    const Vec3 requested_torque(.9, -.7, .08);
+    const auto saturated = sim.allocate(35, requested_torque);
+    Vec3 actual_torque = Vec3::Zero(); double actual_thrust = 0;
+    for (std::size_t i = 0; i < 4; ++i) {
+        const Rotor& rotor = sim.config().rotors[i];
+        const double thrust = rotor.k_thrust * std::pow(saturated[i] * rotor.max_speed_radps, 2);
+        actual_thrust += thrust;
+        actual_torque += (rotor.position_m - sim.config().center_of_mass_m).cross(Vec3(0, 0, thrust));
+        actual_torque.z() += rotor.spin * rotor.k_torque * std::pow(saturated[i] * rotor.max_speed_radps, 2);
+    }
+    near(actual_thrust, 35, 1e-9, "saturated mixer preserves collective");
+    check(actual_torque.dot(requested_torque) > 0, "saturated mixer preserves torque direction");
     Input input; input.armed = true; input.mode = FlightMode::Rate; input.collective = .25;
     sim.set_input(input);
     for (int i = 0; i < 10; ++i) sim.step();

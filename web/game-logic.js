@@ -16,7 +16,10 @@ export function deadzone(value, threshold = .14) {
   return Math.sign(value) * (Math.abs(value) - threshold) / (1 - threshold);
 }
 export function gamepadFlightInput(gamepad, sensitivity) {
-  if (!gamepad || (gamepad.mapping && gamepad.mapping !== 'standard')) return {roll:0, pitch:0, yaw:0, climb:0};
+  // The standard layout is preferred, but browsers can expose usable raw axes for
+  // DirectInput and vendor devices without assigning the standard label. The common
+  // four-axis/two-trigger layout below is deliberately a compatibility fallback.
+  if (!gamepad) return {roll:0, pitch:0, yaw:0, climb:0};
   const axis = index => deadzone(gamepad.axes?.[index] ?? 0);
   const button = index => clamp(gamepad.buttons?.[index]?.value ?? 0, 0, 1);
   return {roll:axis(0)*sensitivity, pitch:-axis(1)*sensitivity, yaw:axis(2)*sensitivity, climb:button(7)-button(6)};

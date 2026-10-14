@@ -106,3 +106,9 @@ Preserve the remote's original core targets, version header, presets and Git LFS
 - Use bounded velocity-error guidance with FLU body-axis signs and a 3.5 m/s mission speed cap. Browser acceptance exposed and corrected the initial lateral-sign/high-speed overshoot; completion still requires actual ground contact and metric thresholds.
 - Follow PX4/MAVLink lifecycle and failsafe concepts without importing their code or adding dependencies. Preserve a versioned report with per-metric source labels so abstractions cannot be mistaken for C++ flight truth.
 - Extend the deterministic procedure layer to SIM-006–SIM-010 without changing the C++ flight model or adding dependencies. Human approval, configuration locks, safety states and non-weapon interface-negative checks are reportable JavaScript procedure models, never claims of certified flight, geofence, sensor, RF or vehicle behavior.
+
+## Browser controller and mixer decision — 2026-10-14
+
+- Accept raw browser gamepad axes when a device omits the `standard` mapping label, using the same four-axis/two-trigger layout and preserving the standard layout as preferred. Rejecting these devices outright made reachable controller input silently unavailable.
+- Allocate collective thrust first, then use a bounded uniform scale for requested torque. This preserves the commanded torque direction under motor saturation and avoids discontinuity from independent rotor clipping.
+- The generic X-01's 0.15 Nm torque ceiling is a conservative engineering estimate, not a calibrated aircraft value. It reserves motor authority for altitude hold and was verified only through the current core/WASM tests and local browser session.

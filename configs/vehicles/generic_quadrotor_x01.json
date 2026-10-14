@@ -16,12 +16,12 @@
   ],
   "drag_area_coeff_m2": [0.08, 0.08, 0.12],
   "angular_drag": 0.01,
-  "controls": {"max_tilt_rad": 0.5, "max_rate_radps": 2.0, "max_torque_nm": 1.0},
+  "controls": {"max_tilt_rad": 0.5, "max_rate_radps": 2.0, "max_torque_nm": 0.15},
   "asset_reference": "/Game/Drone/SM_DefaultDrone",
   "provenance": {
     "official": [],
     "measured": [],
-    "engineering_estimates": ["All physical and control parameters are engineering estimates for a fictional reference quadrotor; no real aircraft fidelity is claimed.", "The user-provided visual drone model does not calibrate or establish the physical parameters."],
+    "engineering_estimates": ["All physical and control parameters are engineering estimates for a fictional reference quadrotor; no real aircraft fidelity is claimed.", "The rate-loop torque ceiling is conservatively tuned below instantaneous mixer authority so altitude hold and attitude correction can coexist without per-motor clipping.", "The user-provided visual drone model does not calibrate or establish the physical parameters."],
     "unknown": ["Real propeller maps, motor constants, vibration, structural flexibility and battery behavior are not characterized."]
   },
   "assumptions": ["Rigid symmetric body; body FLU and world ENU; SI units.", "Four coplanar upward rotors, quadratic thrust/reaction torque, first-order motor lag.", "Simplified quadratic drag and ground contact; no battery or sensor model."],

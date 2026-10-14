@@ -243,12 +243,41 @@ void Simulation::set_paused(bool paused) {
 }
 std::array<double, 4> Simulation::allocate(double thrust_n, const Vec3& torque_nm) const {
     require(finite(thrust_n) && thrust_n >= 0 && torque_nm.allFinite(), "Invalid requested rotor wrench");
-    const Eigen::Vector4d requested(thrust_n, torque_nm.x(), torque_nm.y(), torque_nm.z());
-    const Eigen::Vector4d squared = allocation_inverse_ * requested;
-    require(squared.allFinite(), "Rotor allocation numeric overflow");
+    double maximum_thrust = 0;
+    for (const Rotor& rotor : config_.rotors)
+        maximum_thrust += rotor.k_thrust * rotor.max_speed_radps * rotor.max_speed_radps;
+    const double collective = std::clamp(thrust_n, 0.0, maximum_thrust);
+    const auto squared_for = [&](double torque_scale) -> Eigen::Vector4d {
+        const Eigen::Vector4d requested(collective, torque_scale * torque_nm.x(),
+                                        torque_scale * torque_nm.y(), torque_scale * torque_nm.z());
+        return (allocation_inverse_ * requested).eval();
+    };
+    const auto feasible = [&](const Eigen::Vector4d& squared) {
+        if (!squared.allFinite()) return false;
+        for (std::size_t i = 0; i < config_.rotors.size(); ++i) {
+            const double maximum_squared = config_.rotors[i].max_speed_radps * config_.rotors[i].max_speed_radps;
+            const double tolerance = maximum_squared * 1e-12;
+            if (squared[static_cast<Eigen::Index>(i)] < -tolerance ||
+                squared[static_cast<Eigen::Index>(i)] > maximum_squared + tolerance)
+                return false;
+        }
+        return true;
+    };
+    // PX4-style control allocation gives collective authority priority. The remaining
+    // attitude wrench is desaturated uniformly instead of clipping individual motors.
+    double low = 0.0, high = 1.0;
+    for (int iteration = 0; iteration < 48; ++iteration) {
+        const double middle = (low + high) / 2.0;
+        if (feasible(squared_for(middle))) low = middle;
+        else high = middle;
+    }
+    const Eigen::Vector4d squared = squared_for(low);
+    // `low` starts at zero torque, which is feasible for the clamped collective.
+    // Round-off at an exact motor limit is handled by the final physical clamp.
     std::array<double, 4> commands{};
     for (std::size_t i = 0; i < 4; ++i) {
-        const double speed = std::sqrt(std::max(0.0, squared[static_cast<Eigen::Index>(i)]));
+        const double maximum_squared = config_.rotors[i].max_speed_radps * config_.rotors[i].max_speed_radps;
+        const double speed = std::sqrt(std::clamp(squared[static_cast<Eigen::Index>(i)], 0.0, maximum_squared));
         commands[i] = std::clamp(speed / config_.rotors[i].max_speed_radps, 0.0, 1.0);
     }
     return commands;

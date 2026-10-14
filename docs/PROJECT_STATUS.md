@@ -196,3 +196,13 @@ Measured after applying all Medium scalability groups. Durations include process
 - IMPLEMENTED: default first-person camera, click-initiated Pointer Lock mouse look, standards-based gamepad polling and 15 non-weaponized training templates.
 - NOT_TESTED: physical gamepad hardware, pointer-lock interaction in a browser, rendered scenario selection and cross-browser behavior. These require a local browser session after rebuild.
 - DEFERRED: wind, RF/GNSS, sensor, payload, moving-deck, contamination and multi-UAV models. Scenario labels make these limitations visible.
+
+## Browser controls and mixer repair — 2026-10-14
+
+- IMPLEMENTED: gamepads with usable axes but no `standard` mapping label now use the documented four-axis/two-trigger compatibility layout; per-frame selection prefers the controller receiving input and recovers from missed disconnect events.
+- IMPLEMENTED: allocation clamps collective thrust first and uniformly desaturates attitude torque within the motor-feasible range, replacing individual rotor clipping that could change torque direction. The fictional X-01 rate-loop torque ceiling is conservatively 0.15 Nm.
+- PASS: JavaScript game/mission tests 2/2, WebAssembly smoke, and all ten C++/WASM mission proxies passed. `node tools/web/build-site.mjs` rebuilt the local-only bundle.
+- PASS: a local in-app browser at `http://127.0.0.1:4173/` loaded C++/WASM, the supplied FBX and six textures; SIM-001 reached `SURVEY`, and the supplied red/white drone was visibly rendered in chase view.
+- BLOCKED (sandbox): `node tools/web/server.test.mjs` cannot use `realpath` in the restricted sandbox. The project-local loopback server ran outside it and served only `dist/web` for this browser check.
+- BLOCKED (native rebuild): the restricted build could not start MSVC's program database manager; outside the sandbox the bare compiler environment lacked the standard C++ include paths (`cmath`). Existing CTest executables report 6/6 PASS but predate this source change, so they are not evidence for this repair. The actual Emscripten C++ build and WebAssembly executions above are current evidence.
+- NOT_TESTED: physical gamepad hardware, nonstandard-device physical axis layout, other browser engines, macOS, and hosted CI.

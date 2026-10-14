@@ -91,7 +91,9 @@ No third-party C++ runtime or test framework is required for P0. Use the C++ sta
 - [Python venv](https://docs.python.org/3.12/library/venv.html): create an isolated local environment rather than change global packages.
 # Browser input dependencies — 2026-10-14
 
-No dependency added. Mouse look uses the browser Pointer Lock API; controller input uses the browser Gamepad API. Both are platform APIs, not bundled third-party code. Existing pinned Three.js remains the renderer.
+No dependency added. Mouse look uses the browser Pointer Lock API; controller input uses the browser Gamepad API. Both are platform APIs, not bundled third-party code. Existing pinned Three.js remains the renderer. The implementation prefers the browser's [standard gamepad mapping](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad/mapping), with a documented raw-axis fallback for devices without that label; physical-device compatibility remains unverified.
+
+The repaired core follows the allocation principle documented by [PX4's multicopter controller diagrams](https://github.com/PX4/PX4-Autopilot/blob/main/docs/en/flight_stack/controller_diagrams.md): retain bounded collective authority and desaturate attitude demand instead of letting individual motor clipping silently alter the requested wrench. PX4 and ArduPilot were research references only; no source, binary, parameter set or dependency was imported.
 
 # Mission scenario dependencies — 2026-10-14
 

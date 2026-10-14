@@ -9,7 +9,7 @@ assert.equal(deadzone(.1), 0);
 assert.ok(deadzone(.5) > 0 && deadzone(-.5) < 0);
 const gamepadInput = gamepadFlightInput({axes:[.5,-.5,.5],buttons:[{value:0},{value:0},{value:0},{value:0},{value:0},{value:0},{value:.2},{value:.8}]}, 1);
 assert.equal(gamepadInput.roll, deadzone(.5)); assert.equal(gamepadInput.pitch, deadzone(.5)); assert.equal(gamepadInput.yaw, deadzone(.5)); assert.ok(Math.abs(gamepadInput.climb-.6) < Number.EPSILON);
-assert.deepEqual(gamepadFlightInput({mapping:'vendor-specific',axes:[1,1,1],buttons:[]},1), {roll:0,pitch:0,yaw:0,climb:0});
+assert.deepEqual(gamepadFlightInput({mapping:'vendor-specific',axes:[1,1,1],buttons:[]},1), {roll:1,pitch:-1,yaw:1,climb:0});
 assert.deepEqual(mergeFlightInput({roll:.8,pitch:0,yaw:0,climb:0},{roll:.8,pitch:.2,yaw:-.2,climb:-.3}), {roll:1,pitch:.2,yaw:-.2,climb:-.3});
 assert.equal(SCENARIOS.length, 12);
 assert.equal(scenarioById('sim-001').code, 'SIM-001');
