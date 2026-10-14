@@ -1,5 +1,17 @@
 # Current product dependencies — 2026-10-14
 
+## Active browser target
+
+The browser target supersedes Unreal as the current frontend. It retains the vendored C++ core dependencies below. Project-local Emscripten **6.0.12** compiled the existing core on Windows; its WebAssembly smoke and 5,000-step native equivalence checks passed. Compiler output is captured in `reports/web-build.log`, with runtime results in `reports/web-wasm-smoke.log`. Three.js **0.186.1** supplies rendering and FBX loading, with its MIT license retained. Node.js **24.19.0** handles preparation, build-output assembly and the built-in HTTP server without changing global PATH or adding a web framework/server dependency. See [WEB_GAME.md](WEB_GAME.md).
+
+The fixed Three.js official npm archive is checked against integrity `sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==`. No npm install lifecycle scripts are needed. Preparation retains package metadata, upstream license and provenance in `web/vendor/three`; assembly copies them into local `dist/web/vendor/three`. Core notices are copied into `dist/web/ThirdPartyNotices`.
+
+GitHub/official research: [Emscripten SDK](https://github.com/emscripten-core/emsdk), [Emscripten build guidance](https://emscripten.org/docs/compiling/Building-Projects.html), [Three.js](https://github.com/mrdoob/three.js), [FBXLoader documentation](https://threejs.org/docs/pages/FBXLoader.html), [Three.js MIT license](https://github.com/mrdoob/three.js/blob/dev/LICENSE), and [Node HTTP documentation](https://nodejs.org/api/http.html). Current online documentation is checked against the actual selected tools; availability alone is not compatibility evidence.
+
+Electric Dreams is excluded from the browser due to its [UE-only designation](https://www.fab.com/listings/d79688f5-29be-4fb2-a650-2d4a813f5306). The supplied drone's redistribution license remains unverified. Local generated bundles, SDKs and source assets stay ignored. No Unreal installation or build is required to run the browser game. Entries below preserve historical desktop and core provenance.
+
+## Historical desktop and shared core dependencies
+
 The portable C++20 core is separate from Unreal and has no package download at build time. Reused, pinned source dependencies and original license files are retained under `third_party`; their licenses do not replace the product or asset licenses.
 
 | Dependency | Exact version/revision | License/use |
@@ -9,11 +21,11 @@ The portable C++20 core is separate from Unreal and has no package download at b
 | PicoSHA2 | `161cb3fc4170fa7a3eca9e582cebd27cc4d1fe29` | MIT; exact configuration-byte SHA256 |
 | CMake / CTest | Minimum 3.20; Windows installed 3.31.6-msvc6 | Existing build/test system; no external test framework required |
 | Unreal Engine | Installed 5.8.3 | Existing Epic license; product C++ plugin/UMG/rendering, separate from portable core |
-| GitHub Actions | checkout/setup-python/upload-artifact v7 | Actual v7 execution confirmed in P0 run 38536058546; Windows environment quoting failure was unrelated to action versions |
+| GitHub Actions | checkout/setup-python/upload-artifact v7 | Both platform jobs passed in product run 38542931069; the earlier Windows environment quoting failure was unrelated to action versions |
 
 See [third-party provenance](../third_party/README.md) for official sources, archive/header checksums and notices. No JSBSim, PX4, ArduPilot, ROS, geospatial or GPU simulation backend is installed or claimed integrated. Electric Dreams is requested content currently being acquired; its original license/entitlement and resource requirements apply. User-supplied drone assets have been imported locally but redistribution remains unverified; see [ASSETS.md](ASSETS.md).
 
-Windows builds and physics/config tests passed with these dependencies. Hosted macOS P0 passed with Apple Clang 15/Python 3.12.10, but the new vendored P1 core still needs a current-source hosted result. No new Machine A installation is claimed.
+The vendored product core at commit `7f21881c1b8adbe252f74793250bbb262b1df49b` passed [hosted run 38542931069](https://github.com/timmyc07/drone_emulator/actions/runs/38542931069): Windows MSVC 19.44.35229.0, 6/6 CTests; macOS ARM64 AppleClang 15.0.0.15000309, 5/5 CTests; Python 3.12.10 smoke checks on both. Local Windows physics/configuration and end-to-end results are recorded separately in PROJECT_STATUS. No new Machine A installation is claimed.
 
 ## Historical P0 host inventory
 

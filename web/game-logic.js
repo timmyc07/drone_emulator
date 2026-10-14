@@ -1,0 +1,38 @@
+export const STEP = 0.004;
+export const GATES = [[12, 3, 0], [25, 5, -3], [39, 6, -8], [53, 5, -4], [67, 4, 3], [80, 3, 0]];
+export const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+export const toRenderPosition = ([x, y, z]) => [x, z, -y];
+export const toRenderQuaternion = ([w, x, y, z]) => [x, z, -y, w];
+export function controls(keys, sensitivity) {
+  const axis = (positive, negative) => Number(keys.has(positive)) - Number(keys.has(negative));
+  return { roll: axis('KeyD', 'KeyA') * sensitivity, pitch: axis('KeyW', 'KeyS') * sensitivity,
+    yaw: axis('KeyQ', 'KeyE') * sensitivity, climb: Number(keys.has('Space')) - Number(keys.has('ControlLeft') || keys.has('ControlRight')) };
+}
+// Gates face east, matching the initial body +X heading. Crossing is forward-only.
+export function crossedGate(previous, current, gate, radius = 2.2) {
+  if (previous[0] >= gate[0] || current[0] < gate[0]) return false;
+  const t = (gate[0] - previous[0]) / (current[0] - previous[0]);
+  const dy = previous[1] + (current[1] - previous[1]) * t - gate[1];
+  const dz = previous[2] + (current[2] - previous[2]) * t - gate[2];
+  return dy * dy + dz * dz <= radius * radius;
+}
+export function validSnapshot(s) {
+  const vector = (a, n, limit) => Array.isArray(a) && a.length === n && a.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= limit);
+  return !!s && Number.isFinite(s.time) && s.time >= 0 && s.time <= 7200 &&
+    vector(s.position_m, 3, 100000) && vector(s.velocity_mps, 3, 1000) &&
+    vector(s.orientation_wxyz, 4, 1.01) && Math.abs(Math.hypot(...s.orientation_wxyz) - 1) < 0.01 &&
+    typeof s.armed === 'boolean' && typeof s.grounded === 'boolean';
+}
+export function validateReplay(data) {
+  if (data?.format !== 'uavsim-state-playback-v1' || !Array.isArray(data.frames) || data.frames.length < 2 || data.frames.length > 18000) throw new Error('回放格式不符，或記錄數量超過限制。');
+  let previousTime = -1;
+  for (const frame of data.frames) {
+    if (!validSnapshot(frame) || frame.time <= previousTime) throw new Error('回放包含無效或未按時間排列的狀態。');
+    previousTime = frame.time;
+  }
+  return data.frames;
+}
+export function elapsedLabel(seconds) {
+  const tenths = Math.round(seconds * 10);
+  return `${Math.floor(tenths / 600).toString().padStart(2, '0')}:${((tenths % 600) / 10).toFixed(1).padStart(4, '0')}`;
+}

@@ -1,0 +1,1 @@
+{"name":"uavsim-browser","private":true,"type":"module","scripts":{"test":"node game-logic.test.mjs"}}

@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { controls, crossedGate, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
+assert.deepEqual(toRenderPosition([2, 3, 4]), [2, 4, -3]);
+assert.deepEqual(toRenderQuaternion([.5, .5, .5, .5]), [.5, .5, -.5, .5]);
+assert.deepEqual(controls(new Set(['KeyW', 'KeyD', 'KeyQ', 'Space']), .5), {roll:.5, pitch:.5, yaw:.5, climb:1});
+assert.equal(controls(new Set(['KeyW','KeyS','ControlRight']), 1).pitch, 0);
+assert.equal(controls(new Set(['ControlRight']), 1).climb, -1);
+assert.equal(crossedGate([0,3,0], [20,3,0], [12,3,0]), true, 'fast traversal cannot skip a gate');
+assert.equal(crossedGate([20,3,0], [0,3,0], [12,3,0]), false, 'reverse traversal must not score');
+assert.equal(crossedGate([0,8,0], [20,8,0], [12,3,0]), false, 'passing outside ring must not score');
+assert.equal(crossedGate([12,3,0], [13,3,0], [12,3,0]), false, 'standing on plane must not score twice');
+const frame = {time:0,position_m:[0,0,1],velocity_mps:[0,0,0],orientation_wxyz:[1,0,0,0],armed:true,grounded:false};
+assert.equal(validSnapshot(frame), true);
+for (const invalid of [{...frame,time:NaN},{...frame,position_m:[Infinity,0,0]},{...frame,orientation_wxyz:[0,0,0,0]},{...frame,armed:'true'}]) assert.equal(validSnapshot(invalid), false);
+const replay = {format:'uavsim-state-playback-v1',frames:[frame,{...frame,time:.1}]};
+assert.equal(validateReplay(replay).length, 2);
+assert.throws(()=>validateReplay({...replay,frames:[frame,frame]}));
+assert.throws(()=>validateReplay({...replay,format:'unknown'}));
+assert.throws(()=>validateReplay({...replay,frames:[frame,{...frame,time:.1,position_m:[1e10,0,0]}]}));
+assert.equal(elapsedLabel(63.25), '01:03.3');
+for (const [seconds, label] of [[59.94, '00:59.9'], [59.95, '01:00.0'], [59.96, '01:00.0'], [119.96, '02:00.0'], [3599.96, '60:00.0']]) {
+  assert.equal(elapsedLabel(seconds), label, 'rounded elapsed time must carry into the next minute');
+}
+console.log('PASS: coordinate mapping, control signs, swept forward gate crossings, snapshot/replay trust boundaries, elapsed labels');

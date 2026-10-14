@@ -1,6 +1,12 @@
 # drone_emulator
 
-Universal UAV Simulator (UAVSim) is a C++20 quadrotor simulator with an independent headless physics core and an Unreal Engine 5.8 desktop front end. The current 0.2.0 implementation includes RK4 rigid-body dynamics, four motor models, flight controls, strict vehicle JSON, telemetry and replay. Windows headless acceptance and automated Unreal product tests have passed; final interactive, packaging, Electric Dreams and later product gates remain incomplete. The governing requirements are [MASTER_PLAN.md](docs/MASTER_PLAN.md).
+Universal UAV Simulator (UAVSim) is moving to a browser drone game at the user's request. It reuses the independent C++20 quadrotor core through WebAssembly and Three.js rendering, with the user's supplied drone model as the default aircraft. The existing core provides RK4 rigid-body dynamics, four motor models, flight controls, strict vehicle JSON, telemetry and replay. The browser's current verification state is recorded in [PROJECT_STATUS.md](docs/PROJECT_STATUS.md); earlier native/Unreal tests do not establish browser acceptance.
+
+Follow [the browser build and launch guide](docs/WEB_GAME.md). Current delivery uses a local server at `http://127.0.0.1:4173/`. The forest is independently created; Electric Dreams is UE-only and is excluded. The user's drone assets stay local because redistribution permission is unverified.
+
+On Windows, the current WebAssembly build and runtime checks passed, including 5,000 steps compared with native physics. Chrome and the in-app browser rendered the supplied drone; basic flight, narrow layout, JSON/CSV downloads and recorded-state playback passed. Remaining browser acceptance and platform limits are listed in [PROJECT_STATUS.md](docs/PROJECT_STATUS.md).
+
+The latest target override in [MASTER_PLAN.md](docs/MASTER_PLAN.md) supersedes the original Unreal desktop requirements. Unreal source and the desktop commands below remain historical, with further Unreal builds, packaging and migration suspended.
 
 See [current results](docs/PROJECT_STATUS.md), [P0 plan](docs/P0_PLAN.md), [dependencies](docs/DEPENDENCIES.md), and [engineering decisions](docs/DECISIONS.md).
 
@@ -27,9 +33,11 @@ With native Apple Clang, CMake >=3.20, Ninja and Python 3.12 already installed:
 bash tools/validation/validate_macos.sh
 ```
 
-Hosted macOS ARM64 CI passed the P0 commit `0531568`, including C++20/3 CTests and Python 3.12.10. This is separate from the user's Machine A environment, which still needs Python 3.12, and from the newer P1 source, which needs a fresh cross-platform CI run. The corresponding Windows CI failure was traced to a path quoting bug in developer-environment setup; its local repair and regression test have passed.
+Hosted Windows and macOS ARM64 CI passed product commit `7f21881c1b8adbe252f74793250bbb262b1df49b` in [run 38542931069](https://github.com/timmyc07/drone_emulator/actions/runs/38542931069): Windows 6/6 CTests, macOS 5/5, and Python 3.12.10 smoke checks on both. The extra Windows test verifies developer-environment path handling, including the repaired earlier CI failure. These jobs validate the portable core; the user's Machine A still needs its own Python 3.12 setup and current-source validation.
 
-## Desktop simulator
+## Historical desktop simulator — suspended
+
+To run the verified local prototype without Editor, follow [Windows package instructions](docs/WINDOWS_PACKAGE.md). The package remains local because asset redistribution terms are unverified.
 
 Open `unreal/UAVSim/UAVSim.uproject` with the selected Unreal Engine **5.8.3**. The product plugin compiles the same portable core, disables Chaos on the vehicle, advances at a fixed 0.004-second step and interpolates rendering. The responsive menu exposes aircraft/environment selection, graphics/resolution, display units, sensitivity, key bindings and flight controls. Default keys: W/S pitch, A/D roll, Q/E yaw, Space/Ctrl climb, F arm, M mode, P pause, R reset and Esc menu. Actual gamepad hardware remains unverified.
 
@@ -39,7 +47,7 @@ Open `unreal/UAVSim/UAVSim.uproject` with the selected Unreal Engine **5.8.3**. 
 
 Pass `-EngineRoot` if the selected engine is installed elsewhere. `-SkipBuild` validates an already built product without claiming a new build. `-PackagedExecutable` accepts an existing absolute `.exe` path and additionally tests that standalone application. The validator checks exact Unreal automation results plus DX12/model/flight/session markers; its timestamped reports retain failures and keep manual visual inspection separate.
 
-The user-provided FBX and six textures have been imported locally. Reproduce the lightweight map with `tools/unreal/create_product_level.py`; asset setup uses `tools/unreal/setup_product_assets.py` and `tools/unreal/import_drone.py`. These scripts run in Unreal's Python environment. The Electric Dreams environment is requested and its acquisition/integration is still in progress. See [asset status and licenses](docs/ASSETS.md); raw third-party assets remain excluded from GitHub.
+The user-provided FBX and six textures were imported locally. Historical lightweight map reproduction uses `tools/unreal/create_product_level.py`; asset setup uses `tools/unreal/setup_product_assets.py` and `tools/unreal/import_drone.py`. These scripts run in Unreal's Python environment. Electric Dreams was acquired locally; integration is suspended under the browser target. See [asset status and licenses](docs/ASSETS.md); raw third-party assets remain excluded from GitHub.
 
 The desktop saves CSV and recorded-state playback files under its writable `Saved/Sessions` directory. UI playback displays recorded states; headless replay re-executes recorded inputs and checks the trajectory. Neither establishes real-aircraft fidelity. A packaged distribution must pass its own standalone acceptance before being described as released.
 

@@ -1,5 +1,11 @@
 # UAVSim Repository Rules
 
+## Current user-directed target — 2026-10-14
+
+The user replaced the Unreal desktop delivery target with a browser drone game. This overrides earlier Unreal implementation, Electric Dreams integration and Windows-package requirements for current work. Reuse the independent C++20 simulation core through WebAssembly and keep the user's supplied ZIP drone as the default visual model. Do not resume Unreal builds/migration or convert UE-only Electric Dreams content for the web. Existing Unreal source, local assets and historical test evidence remain preserved.
+
+Use a responsive browser UI and a project-local build. Serve only the prepared `dist/web` directory on `127.0.0.1`; do not expose the repository or publish a hosted site. The supplied drone assets remain ignored/local while redistribution permission is unverified. Browser acceptance requires actual rendered model/material and interaction evidence; prior native/Unreal PASS results do not establish browser success. The review, documentation, validation and commit/push rules below still apply to source changes.
+
 - Build the portable core as cross-platform C++20 with CMake and CTest.
 - Keep the headless simulation core independent of Unreal Engine.
 - Prioritize shippable software and operational evidence; do not add academic thesis deliverables.

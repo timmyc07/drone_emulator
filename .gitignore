@@ -42,3 +42,8 @@ dist/
 unreal/UAVSim/Content/
 unreal/UAVSim/Config/DefaultInput.ini
 unreal/UAVSim/Config/Vehicles/
+
+# Reproducible browser dependencies and compiled physics; user assets stay local.
+web/vendor/
+web/generated/
+web/assets/

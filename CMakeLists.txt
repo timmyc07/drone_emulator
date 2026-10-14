@@ -14,7 +14,7 @@ if(BUILD_TESTING)
   add_test(NAME uavsim_smoke COMMAND uavsim_smoke)
 endif()
 
-# Portable simulation and configuration; rendering remains a separate Unreal plugin.
+# Portable simulation and configuration; rendering is a separate consumer.
 add_library(uavsim_core STATIC src/simulation.cpp)
 target_include_directories(uavsim_core PUBLIC include)
 target_include_directories(uavsim_core SYSTEM PUBLIC third_party/eigen)
@@ -28,6 +28,21 @@ endif()
 add_library(uavsim_config STATIC src/config.cpp)
 target_link_libraries(uavsim_config PUBLIC uavsim_core)
 target_include_directories(uavsim_config SYSTEM PRIVATE third_party third_party/picosha2)
+
+if(EMSCRIPTEN)
+  # The core validates by throwing; catching must remain enabled across all objects.
+  target_compile_options(uavsim_core PUBLIC -fexceptions)
+  target_link_options(uavsim_core INTERFACE -fexceptions)
+  add_executable(uavsim_web src/web_bridge.cpp)
+  target_link_libraries(uavsim_web PRIVATE uavsim_config)
+  target_include_directories(uavsim_web SYSTEM PRIVATE third_party)
+  target_link_options(uavsim_web PRIVATE
+    -lembind -sMODULARIZE=1 -sEXPORT_ES6=1 -sEXPORT_NAME=createUAVSimCore
+    -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=web,node)
+  set_target_properties(uavsim_web PROPERTIES
+    OUTPUT_NAME uavsim SUFFIX .mjs
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/web/generated")
+endif()
 
 add_executable(uavsim_headless src/headless.cpp)
 target_link_libraries(uavsim_headless PRIVATE uavsim_config)

@@ -1,7 +1,17 @@
 # CODEX MASTER PROMPT V2.0
 # Universal UAV Simulator — Product Development
 
-> Execution status (2026-10-14): this file remains the governing specification, not a completion claim. P1 has executable Windows acceptance evidence; product Unreal build/automation/runtime tests have passed. Interactive P2/P3 acceptance, standalone packaging, requested Electric Dreams integration and P4–P7 remain incomplete. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for exact evidence and [ROADMAP.md](ROADMAP.md) for remaining gates. Unreal 5.8.3 is the selected installed engine.
+## Current target override — 2026-10-14
+
+The user's latest direction is a browser drone game, without Unreal, using the same user-supplied ZIP drone as the default aircraft appearance. This direction supersedes the Unreal visualization/integration requirements, Windows desktop/package delivery target and Electric Dreams work below. The original specification is retained as historical product context; its remaining Unreal tasks are suspended, not new browser acceptance gates.
+
+The active architecture retains the existing cross-platform C++20 flight core and compiles it to WebAssembly with a project-local Emscripten toolchain. Three.js supplies browser rendering and its existing FBX loader. Physics remains the single source of aircraft movement; graphical gameplay uses an independently created forest, not converted UE-only Electric Dreams content. The visual drone does not change the reference quadrotor's estimated physical parameters.
+
+Current delivery is a locally served browser build with responsive Chinese controls/HUD, the supplied model/materials, actual flight controls, pause/reset and visible loading/failure states. Use [WEB_GAME.md](WEB_GAME.md) for commands and boundaries and [PROJECT_STATUS.md](PROJECT_STATUS.md) for executed evidence. Browser, WebAssembly and material acceptance require their own tests. Preserve historical evidence and source, and retain existing engineering, license, review and verification requirements. Hosted publication and redistribution of the unverified-license drone assets are not part of this delivery.
+
+## Historical desktop specification
+
+> Execution status (2026-10-14): this file remains the governing specification, not a completion claim. P1 has executable Windows acceptance evidence, and product commit `7f21881c1b8adbe252f74793250bbb262b1df49b` passed both Windows and macOS ARM64 core CI in [run 38542931069](https://github.com/timmyc07/drone_emulator/actions/runs/38542931069). Product Unreal build/automation/runtime tests and the first standalone Windows package/runtime have passed locally. Interactive P2/P3 repairs/regression, clean-machine release acceptance, requested Electric Dreams integration and P4–P7 remain incomplete. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for exact evidence and [ROADMAP.md](ROADMAP.md) for remaining gates. Unreal 5.8.3 is the selected installed engine.
 
 ## 0. Your Mission and Authority
 

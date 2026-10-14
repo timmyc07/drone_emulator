@@ -1,6 +1,30 @@
 # Project Status
 
-## Current product session — 2026-10-14
+## Active browser pivot — 2026-10-14
+
+The user changed the deliverable to a browser drone game without Unreal and retained the same supplied ZIP drone as the default model. The earlier desktop status below is historical evidence; remaining Unreal fixes, packages and Electric Dreams migration are suspended. No earlier PASS is carried over to browser acceptance.
+
+Three parallel preimplementation reviews covered current official/GitHub compatibility, core/frontend failure risks and conventions/operations/licensing before browser changes. The reviewed architecture reuses the C++20 core through project-local Emscripten 6.0.12 and Three.js rendering. The local server exposes only prepared `dist/web` files on `127.0.0.1:4173`. The scene is independently created: [Electric Dreams is UE-only](https://www.fab.com/listings/d79688f5-29be-4fb2-a650-2d4a813f5306). Supplied FBX/textures remain local and excluded from GitHub.
+
+| Browser gate | Captured result on this Windows host |
+| --- | --- |
+| Project-local Emscripten / existing core WebAssembly build | PASS: Emscripten 6.0.12 compiled the existing core; `reports/web-build.log`. Generated `uavsim.mjs` is 83,774 bytes; `uavsim.wasm` is 342,798 bytes |
+| WebAssembly runtime and native equivalence | PASS: `reports/web-wasm-smoke.log`; 5,000 native recorded-input steps reproduced with maximum state error `1.4094628242311558e-15` (threshold `1e-9`). Vehicle provenance, 20 s hover, invalid input, pause/reset and failure recovery passed |
+| Same-ZIP default drone / materials | PASS in actual Chrome and in-app browser rendering: supplied FBX shown with red/white surfaces; DOM reports `model=supplied-fbx`, `textures=6`. This is browser evidence, separate from the historical Unreal material failure |
+| Flight input and session controls | PASS for observed start and approximately 1 m hover for 1 min 38 s, W movement at about 2.2 m/s, Space climb to about 4.6 m, Q heading about 65 degrees, camera switch, reset and pause. Holding P for 1,500 ms left the game paused. Imperial selection changed hover HUD to 3.3 ft |
+| Recording downloads and playback | PASS: actual `uavsim-flight.json` and `uavsim-telemetry.csv` downloads. Importing the downloaded JSON through the file chooser showed recorded-state playback; both export buttons were disabled during playback. Importing malformed `{}` JSON showed the explicit invalid-format message |
+| Responsive layout | PASS in the in-app browser at a 375×812 viewport: menu and live flight HUD fit, with `document.scrollWidth = innerWidth = 375`. Viewport restored after inspection. This does not establish physical phone/touch acceptance |
+| Six-ring course completion | NOT_TESTED in full interactive play; basic movement and session controls do not establish completion of all six rings |
+| Static server boundary / bundle preflight / gameplay tests | PASS on the final rerun: HTTP method/path/MIME checks, required-file/type preflight and gameplay logic tests. Missing build inputs fail before modifying existing output. Restricted sandbox `realpath` EPERM is an environment limitation, retained separately |
+| Browser missing-resource behavior | PASS in an isolated loopback fixture on port 4174: missing supplied FBX showed `無法開始：找不到指定的 QuadDrone FBX 模型。請執行網頁準備程序。`; missing WASM showed the module-fetch abort. Start stayed disabled in both cases. The normal prepared site was preserved |
+| Local dependency notices / asset exclusions | PASS: all eight core notice/provenance files and the Three.js LICENSE matched prepared output by SHA256. Git ignore checks covered the source drone, prepared site, generated WASM, vendor and local SDK |
+| Current native core regression | PASS: `reports/web-native-regression.log`, Windows configure/build and 6/6 CTests, 2.62 s |
+| Current source hosted CI / other browser platforms | NOT_TESTED; historical commit `7f21881c1b8adbe252f74793250bbb262b1df49b` remains the separately verified hosted CI baseline |
+| Public site / raw asset redistribution | Out of scope; local delivery only, drone redistribution license unverified |
+
+Commands and current boundaries: [WEB_GAME.md](WEB_GAME.md). Final browser observations are retained in the local acceptance record `reports/web-browser-acceptance.json`. The final validation reran the HTTP, preflight, gameplay and 5,000-step WebAssembly equivalence checks successfully. Core equivalence uses finite recorded trajectories; it does not establish calibrated real-aircraft behavior. Full interactive course completion, physical touch/gamepad hardware, other browser engines and other machines remain separate unverified gates.
+
+## Historical desktop product session — 2026-10-14
 
 **Host:** Windows 11 x64, Ryzen 7 7700, 32 GiB installed RAM, RTX 5070. **Source version:** 0.2.0. **Progress:** P1 implemented and verified on this Windows host; P2/P3 product integration is undergoing acceptance. The complete MASTER_PLAN product, Electric Dreams integration and P4–P7 are not complete.
 
@@ -8,6 +32,7 @@
 | --- | --- |
 | Portable dynamics/control/configuration | IMPLEMENTED AND VERIFIED on Windows: Eigen math, RK4 6-DOF, validated inertia/rotor geometry, first-order motors, drag/wind/gravity/flat ground, rate/attitude/altitude modes, PID reset/anti-windup, strict JSON/provenance and SHA256 |
 | Core CTest | PASS: 6/6 in `reports/product/final-core-validation.log`, 2.34 s; includes Windows environment path regression, physics, config, original smoke and invalid argument cases |
+| Hosted core CI / source synchronization | PASS: pushed commit `7f21881c1b8adbe252f74793250bbb262b1df49b`, run 38542931069; Windows 6/6 and macOS ARM64 5/5 CTests plus Python 3.12.10 smoke checks, verified from actual job logs |
 | Headless end-to-end | PASS: `reports/product/20261014-092001-6027898/validation.log`; 30 s hover and recorded-input replay, 7,500 steps each, maximum hover/replay error 0; takeoff-land peak about 2.174 m and final ground contact/zero speed; 7,501 CSV rows and independently checked SHA256 |
 | Negative input/replay checks | PASS: malformed/invalid configuration, nonfinite duration, output overwrite, changed config hash, altered trajectory and embedded NUL corruption rejected. The NUL test reproduced acceptance of corruption in the previous binary, then passed after the fix |
 | Unreal product Editor build | PASS: `reports/product/unreal-build.log`, `Result: Succeeded`; earlier header/lifecycle build failures retained separately |
@@ -15,16 +40,20 @@
 | Product DX12 runtime smoke | PASS: `reports/product/runtime-smoke.log`, model `SM_DefaultDrone`, fixed step 0.004 s, 752-frame save/playback and `UAVSIM_RUNTIME_PASS` at frame 179; this is automated runtime evidence, not full manual UI acceptance |
 | Drone asset import | PASS: `reports/product/asset-import.log`, `UAVSIM_DRONE_IMPORT_PASS ... textures=6`; raw assets stay local pending redistribution-license verification |
 | Final replay hardening and repeatable Unreal validation | PASS: `reports/product/replay-build.log` (30.82 s), then `reports/product/unreal-20261014-092847-1541711/validation.json`: both `AdapterAndLifecycle` and `ReplayValidation` Success with zero errors; DX12 smoke frame 235, altitude 0.5871 m, real default model and pause/reset/save/replay verified. Oversized/nonfinite states, origins and motor values are rejected before rendering |
-| Desktop menu/settings/input | IMPLEMENTED; full interactive settings persistence, user flight/landing and actual gamepad hardware acceptance NOT_TESTED |
-| Windows package | IN PROGRESS / NOT_YET_VERIFIED: standalone cook/package and execution are separate gates from Editor build/runtime |
-| Electric Dreams | Requested; acquisition/integration IN PROGRESS. No completed download, import, performance or packaged environment acceptance claimed |
+| Desktop menu/settings/input | PARTIAL interactive evidence: start/approximately 1 m hover for 33 s, pause, save/playback, menu/Esc, feet units, 1920×1080 apply and exit exercised. Lighting overlay, dropdown contrast and stale menu arming display found; repairs and full regression pending. Full settings persistence, landing, visual asset quality and gamepad acceptance remain unverified |
+| First Windows package | PASS: `reports/product/package.log`, BuildCookRun 175.18 s, exit 0; `dist/UAVSim-Windows-20261014-173017/Windows/UAVSim.exe`; 59 files / 997,739,689 bytes before runtime-generated files. Eight notice/provenance files and vehicle JSON hashes verified |
+| First packaged runtime | PASS: `reports/product/unreal-20261014-093336-4348265/validation.json`, actual game executable launched without Editor; separate automation/runtime gates also PASS. This package predates the current UI/lighting repairs; clean-machine release acceptance remains NOT_TESTED |
+| First-package visual acceptance | FAIL: white fallback drone material; `reports/product/package.log` lines 327–328 report `M_DefaultDrone` compile failure, `(Node OneMinus) Missing 1-x input`. Material graph validation and packaging failure detection are being repaired alongside lighting/UI defects; visual regression remains pending |
+| Electric Dreams | Acquired locally for UE 5.8.3. CloseRange preflight found 1,216 `/Game` dependencies including 107 external actors and five external objects, with no missing source packages. First native resave migration stopped safely at the 20 GiB process cap after 149.37 s (peak private 21,514,334,208 bytes); failed stage retained and product unchanged. A lower-memory copy migration is being reviewed. Product rendering/performance/cooking remain NOT_TESTED |
 | P4–P7 | PLANNED: multiple vehicle families, advanced sensors/SITL/weather, library expansion and product release gates not implemented/verified |
 
 The local reference configuration hash used above is `2fff42c10efba4dfb7a52be4e1f7644fa97dee3949789501f00353fe8cc3f0dd`. Numerical results apply to the fictional engineering-estimate quadrotor, not a calibrated real aircraft. Unit test details and acceptance thresholds are in [P1_ACCEPTANCE.md](P1_ACCEPTANCE.md).
 
 ### Hosted CI and remaining infrastructure
 
-[Run 38536058546](https://github.com/timmyc07/drone_emulator/actions/runs/38536058546) tested P0 commit `0531568c3a741ca988cafdb0059471746f3a8883`: macOS ARM64 PASS (Apple Clang 15.0.0, 3/3 CTests, Python 3.12.10); Windows FAIL before CMake because the quoted `Program Files` developer-script path was parsed incorrectly. All three Actions v7 resolved and ran. The local helper repair passes path-with-spaces/parentheses, child isolation and failure handling tests; a new hosted run must establish the repaired and current product source status. The user made the existing repository public; no credential extraction was used for log inspection.
+[Run 38542931069](https://github.com/timmyc07/drone_emulator/actions/runs/38542931069) passed for product commit `7f21881c1b8adbe252f74793250bbb262b1df49b`. Actual [Windows job logs](https://github.com/timmyc07/drone_emulator/actions/runs/38542931069/job/115781862523) record MSVC 19.44.35229.0 and 6/6 CTests (3.90 s); [macOS ARM64 job logs](https://github.com/timmyc07/drone_emulator/actions/runs/38542931069/job/115781863285) record AppleClang 15.0.0.15000309 and 5/5 CTests (1.46 s). Both record Python 3.12.10 venv/import/filesystem smoke PASS. The extra Windows test covers developer-environment paths. These hosted jobs validate the portable core and bootstrap, not Unreal or the full product workflow.
+
+Historical [run 38536058546](https://github.com/timmyc07/drone_emulator/actions/runs/38536058546), P0 commit `0531568c3a741ca988cafdb0059471746f3a8883`, passed macOS but failed Windows before CMake on the quoted `Program Files` developer-script path. The process-local helper and spaces/parentheses, child-isolation and failure-handling regression resolved that failure in the successful product run above. All three Actions v7 resolved and ran. The user made the existing repository public; log inspection used the GitHub connector, without credential extraction.
 
 Machine A still requires its own Python 3.12 and current-source check; hosted macOS evidence does not change that machine's installed software. WSL installation still requires the separately approved reboot before Ubuntu initialization. These blockers do not masquerade as PASS.
 
@@ -32,7 +61,7 @@ Machine A still requires its own Python 3.12 and current-source check; hosted ma
 
 Executed `tools/bootstrap/build_windows.ps1` (configure/build/CTest), `tools/validation/validate_product.ps1 -SkipBuild`, Unreal `Build.bat UAVSimEditor Win64 Development`, product automation, asset import and DX12 game runtime. Exact outputs live under ignored `reports/product`. The restricted MSVC C1902 failure was preserved and the same compiler succeeded outside the sandbox. The product validator now explicitly returns success after all expected negative cases; a wrapper test returned 0 (`validator-exit-contract.log`) while the actual script run with a missing executable returned 1 (`validator-missing-executable.log`). The consolidated Unreal validator is `tools/validation/validate_product_unreal.ps1`, with optional `-SkipBuild` and `-PackagedExecutable`; creation of that script alone is not an additional executed result.
 
-Next: finish and run the actual standalone package; complete interactive flight/settings/session workflow; acquire/import/profile Electric Dreams; push the final reviewed source and verify both hosted CI jobs. Preserve unverified gamepad, host-specific and later-stage gates. This section supersedes the historical P0-only status below.
+First-package launch instructions, executable checksums and limitations are in [WINDOWS_PACKAGE.md](WINDOWS_PACKAGE.md). Next: rebuild and retest the package after the observed UI/lighting repairs; complete interactive flight/settings/session workflow and clean-machine acceptance; acquire/import/profile Electric Dreams. Keep both hosted CI jobs passing for subsequent source changes. Preserve unverified gamepad, host-specific and later-stage gates. This section supersedes the historical P0-only status below.
 
 ## Historical P0 closeout (preserved)
 
@@ -51,7 +80,7 @@ Next: finish and run the actual standalone package; complete interactive flight/
 | P0.6 local | PASS: original uavsim_smoke plus cpp20_smoke and invalid-argument test; information executable reports version 0.1.0; Python venv/import/filesystem smoke and pip checks PASS |
 | P0.7 local | PASS for actual sampled Windows build/Editor/scene observations; true idle baseline and exact process-tree peaks NOT_TESTED |
 | P0-A Mac | Prior C++/CTest evidence preserved below; Python 3.12 missing and merged source NOT_TESTED on Machine A |
-| Hosted CI (historical visibility) | Status had not been confirmed at this P0 closeout. The current section above records subsequently retrieved actual macOS PASS / Windows FAIL evidence |
+| Hosted CI (historical visibility) | Status had not been confirmed at this P0 closeout. The current section above records the earlier Windows failure and subsequent Windows/macOS PASS for the product source |
 | Remote synchronization | PASS: implementation commit `436d1c7` pushed normally; `git ls-remote` matched local SHA `436d1c76b81dddde5710b11718cb6870917cf744`; remote history preserved |
 
 ## Changes and commands executed

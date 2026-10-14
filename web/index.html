@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#172c28">
+  <title>UAVSim — 林間飛行訓練場</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+  <main id="app">
+    <div id="viewport" aria-label="無人機三維訓練場"></div>
+    <header class="topbar">
+      <a class="brand" href="#" id="brand" aria-label="開啟主選單"><span class="brand-mark">✣</span><span>UAV<span class="brand-light">SIM</span><small>FLIGHT LAB / 01</small></span></a>
+      <div class="location"><span class="live-dot"></span>林間訓練場 <span class="divider">/</span> 晴朗・無風</div>
+      <button id="menu-button" class="icon-button" aria-label="開啟選單">☰</button>
+    </header>
+
+    <section id="menu" class="menu-panel" aria-labelledby="menu-title">
+      <div class="eyebrow">自由探索，由此起飛</div>
+      <h1 id="menu-title">把天空<br>交給你的雙手<span>。</span></h1>
+      <p class="intro">在林間開闊訓練場練習起降、轉向與穿環。<br>真實動力學核心，專注每一次操控。</p>
+      <div class="aircraft-card"><span class="aircraft-icon">⌘</span><div><strong>QUAD DRONE</strong><small>指定科幻模型 · 四旋翼 X-01</small></div><span class="tag">1.5 kg</span></div>
+      <fieldset class="mission-options"><legend>選擇飛行方式</legend><label><input type="radio" name="mission" value="course" checked><span><b>穿環挑戰</b><small>6 個航點 / 計時訓練</small></span><span>↗</span></label><label><input type="radio" name="mission" value="free"><span><b>自由飛行</b><small>慢慢探索，熟悉手感</small></span><span>↗</span></label></fieldset>
+      <button id="start" class="primary" disabled>正在準備飛行… <span>→</span></button>
+      <p id="load-status" class="load-status" role="status">載入飛行核心與飛行器</p>
+      <div class="menu-links"><button id="settings-open">飛行設定</button><button id="help-open">操作說明</button><button id="replay-open">開啟回放</button></div>
+      <p class="fine-print">工程估計機型 · 定高輔助 · 平坦地面接觸模型</p>
+    </section>
+
+    <section id="flight-hud" class="flight-hud" hidden aria-label="飛行儀表">
+      <div class="mission-card"><span class="eyebrow" id="mission-label">穿環挑戰</span><div><strong id="gate-count">01 <span>/ 06</span></strong><span id="mission-time">00:00.0</span></div><p id="mission-hint">穿越前方亮起的光環</p><div class="progress-track"><div id="mission-progress"></div></div></div>
+      <div class="flight-state"><span class="live-dot"></span><span id="flight-state">定高模式</span><span id="record-state">● 記錄中</span></div>
+      <div class="telemetry"><div><small>高度 AGL</small><strong id="altitude">0.0<em>m</em></strong></div><div><small>地速</small><strong id="speed">0.0<em>m/s</em></strong></div><div><small>垂直速度</small><strong id="vertical">0.0<em>m/s</em></strong></div><div><small>航向</small><strong id="heading">090<em>°</em></strong></div></div>
+      <div class="flight-toolbar"><button id="arm">停轉 <kbd>F</kbd></button><button id="camera">追蹤視角 <kbd>C</kbd></button><button id="pause">暫停 <kbd>P</kbd></button><button id="reset">重新起飛 <kbd>R</kbd></button><button id="help-flight" aria-label="操作說明">?</button></div>
+      <div class="touch-controls" aria-label="觸控飛行控制"><div class="touch-pad"><button data-key="KeyW" aria-label="向前">↑</button><button data-key="KeyA" aria-label="向左">←</button><button data-key="KeyS" aria-label="向後">↓</button><button data-key="KeyD" aria-label="向右">→</button></div><div class="touch-pad"><button data-key="Space" aria-label="上升">＋</button><button data-key="KeyQ" aria-label="左轉">↶</button><button data-key="ControlLeft" aria-label="下降">−</button><button data-key="KeyE" aria-label="右轉">↷</button></div></div>
+    </section>
+
+    <div class="scene-caption" id="scene-caption"><span>01 / FOREST TRAINING GROUND</span><strong>向天空出發。</strong><small>W A S D 移動 · Space 上升 · Ctrl 下降</small></div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <dialog id="pause-dialog"><div class="eyebrow">FLIGHT PAUSED</div><h2 id="pause-title">稍作停留</h2><p id="pause-message">飛行已暫停，準備好再繼續。</p><button id="resume" class="primary">繼續飛行 <span>→</span></button><div class="dialog-grid"><button id="save-session">儲存回放</button><button id="save-csv">匯出 CSV</button><button id="pause-reset">重新開始</button><button id="back-menu">回主選單</button></div><small>記錄只留在此分頁；由您選擇下載。</small></dialog>
+    <dialog id="settings-dialog"><button class="close" data-close="settings-dialog" aria-label="關閉">×</button><div class="eyebrow">YOUR FLIGHT, YOUR WAY</div><h2>飛行設定</h2><label class="setting">操控靈敏度 <output id="sensitivity-value">50%</output><input id="sensitivity" type="range" min="20" max="100" step="5" value="50"></label><label class="setting">畫面品質<select id="quality"><option value="medium">平衡</option><option value="high">精細</option><option value="low">流暢</option></select></label><label class="setting">顯示單位<select id="units"><option value="metric">公尺 / 公尺每秒</option><option value="imperial">英尺 / 英里每小時</option></select></label><p>設定自動儲存在此瀏覽器。飛行運算固定為每秒 250 步。</p><button data-close="settings-dialog" class="primary">完成 <span>✓</span></button></dialog>
+    <dialog id="help-dialog"><button class="close" data-close="help-dialog" aria-label="關閉">×</button><div class="eyebrow">PILOT'S QUICK GUIDE</div><h2>第一趟飛行</h2><p>開始後自動啟動旋翼，定高至 1 公尺。按住 Space 升至光環高度，輕點 W 向前。鬆開方向鍵會回正姿態，仍有慣性；反向輸入可減速。</p><dl class="controls-list"><dt>W / S</dt><dd>前進 / 後退</dd><dt>A / D</dt><dd>左移 / 右移</dd><dt>Q / E</dt><dd>左轉 / 右轉</dd><dt>Space / Ctrl</dt><dd>上升 / 下降</dd><dt>F</dt><dd>旋翼啟動 / 停轉</dd><dt>C</dt><dd>追蹤 / 機頭視角</dd><dt>P / R / Esc</dt><dd>暫停 / 重設 / 選單</dd></dl><p>離開分頁會自動暫停。觸控裝置使用畫面方向按鈕。樹林為視覺背景；目前不模擬樹木碰撞或地形碰撞。</p><button data-close="help-dialog" class="primary">了解，準備飛行 <span>→</span></button></dialog>
+    <input id="replay-file" type="file" accept="application/json,.json" hidden>
+    <footer class="footer-note">UAVSIM <span>Browser Edition</span><span id="engine-status">核心準備中</span></footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
