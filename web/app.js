@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { STEP, GATES, clamp, controls, crossedGate, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
+import { STEP, GATES, SCENARIOS, clamp, controls, crossedGate, gamepadFlightInput, mergeFlightInput, scenarioById, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
 
 const $ = id => document.getElementById(id);
 const log = (event, detail = '') => console.info(`[UAVSim] ${event}`, detail);
@@ -15,9 +15,11 @@ try {
 } catch (error) { console.warn('[UAVSim] Settings unavailable', error.message); }
 let core, renderer, scene, camera, aircraft, model, sun;
 let ready = false, state, previousState, running = false, inFlight = false, armed = false;
-let mode = 'course', cameraMode = 'chase', targetAltitude = 1, gateIndex = 0, finished = false;
+let mode = 'course', scenario = scenarioById('course'), cameraMode = 'fpv', targetAltitude = 1, gateIndex = 0, finished = false;
 let accumulator = 0, lastFrame = 0, frames = [], lastRecord = -1, recordFull = false;
 let playback = null, playbackTime = 0, playbackIndex = 0, toastTimer;
+let lookYaw = 0, lookPitch = 0, gamepadIndex = null;
+const gamepadButtons = new Map();
 const gateMeshes = [], cameraPosition = new THREE.Vector3(), cameraTarget = new THREE.Vector3();
 const renderPosition = new THREE.Vector3(), renderRotation = new THREE.Quaternion();
 const forward = new THREE.Vector3(), desiredCamera = new THREE.Vector3();
@@ -117,6 +119,17 @@ function createWorld() {
   camera.position.set(-7,4.5,10);camera.lookAt(0,1,0);cameraPosition.copy(camera.position);cameraTarget.set(0,1,0);
   resize(); addEventListener('resize',resize);
   renderer.domElement.addEventListener('webglcontextlost',event => {event.preventDefault(); fail(new Error('繪圖連線已中斷，請重新載入頁面。'));});
+  renderer.domElement.addEventListener('click', () => {
+    if (inFlight && running && cameraMode === 'fpv' && !document.querySelector('dialog[open]') && document.pointerLockElement !== renderer.domElement) renderer.domElement.requestPointerLock();
+  });
+  document.addEventListener('pointerlockchange', () => {
+    if (document.pointerLockElement === renderer.domElement) log('First-person mouse look captured');
+  });
+  document.addEventListener('mousemove', event => {
+    if (document.pointerLockElement !== renderer.domElement || !inFlight || !running || cameraMode !== 'fpv') return;
+    lookYaw -= event.movementX * .0025 * settings.sensitivity;
+    lookPitch = clamp(lookPitch - event.movementY * .0025 * settings.sensitivity, -1.2, 1.2);
+  });
   renderer.setAnimationLoop(animate);
 }
 function resize() {
@@ -170,7 +183,7 @@ async function loadDrone() {
 function refreshGates() {
   gateMeshes.forEach((group,index)=>{group.visible=mode==='course';group.children[0].material.color.set(index<gateIndex?'#708767':index===gateIndex?'#d9f58b':'#bbc9b4');group.children[0].material.emissiveIntensity=index===gateIndex?1.5:.08;group.children[2].material.opacity=index===gateIndex?1:.4;});
   $('gate-count').innerHTML=mode==='course'?`${Math.min(gateIndex+1,6).toString().padStart(2,'0')} <span>/ 06</span>`:'FREE <span>FLIGHT</span>';
-  $('mission-label').textContent=playback?'飛行狀態回放':mode==='course'?'穿環挑戰':'自由飛行';
+  $('mission-label').textContent=playback?'飛行狀態回放':scenario.name;
   $('mission-progress').style.width=`${gateIndex/6*100}%`;
 }
 function resetSession() {
@@ -181,9 +194,9 @@ function resetSession() {
 function start() {
   if(!ready)return;
   try {
-    mode=document.querySelector('input[name="mission"]:checked').value;resetSession();inFlight=true;running=true;
+    scenario=scenarioById($('scenario').value);mode=scenario.mode;resetSession();inFlight=true;running=true;
     $('menu').hidden=true;$('scene-caption').hidden=true;$('flight-hud').hidden=false;
-    $('pause-dialog').close();notify('旋翼已啟動。Space 上升，W 向前，P 暫停。');
+    $('pause-dialog').close();notify('第一人稱已啟用。點擊畫面後用滑鼠查看；Space 上升，W 向前。');
   } catch(error){fail(error);}
 }
 function pause(title='稍作停留',message='飛行已暫停，準備好再繼續。') {
@@ -252,7 +265,8 @@ function updateSimulation(delta) {
   accumulator+=delta;
   const steps=Math.min(64,Math.floor(accumulator/STEP));
   if(!steps)return;
-  const input=controls(keys,settings.sensitivity);
+  const gamepad = gamepadIndex === null ? [...navigator.getGamepads()].find(Boolean) : navigator.getGamepads()[gamepadIndex];
+  const input=mergeFlightInput(controls(keys,settings.sensitivity),gamepadFlightInput(gamepad,settings.sensitivity));
   targetAltitude=clamp(targetAltitude+input.climb*2.5*steps*STEP,0,50);
   check(core.setInput(armed,2,input.roll,input.pitch,input.yaw,.5,targetAltitude));
   const before=toRenderPosition(state.position_m);
@@ -285,7 +299,7 @@ function updateHud() {
   if(mode==='course' && gateIndex<GATES.length) {
     const distance=Math.hypot(...toRenderPosition(state.position_m).map((v,i)=>v-GATES[gateIndex][i]));
     $('mission-hint').textContent=`距離 ${distance.toFixed(0)} m · 目標高度 ${GATES[gateIndex][1]} m`;
-  } else $('mission-hint').textContent=playback?'重現已記錄的飛行狀態':'自由探索 · 定高範圍 0–50 m';
+  } else $('mission-hint').textContent=playback?'重現已記錄的飛行狀態':`${scenario.briefing} · ${scenario.condition}`;
 }
 function updateView(delta) {
   if(!state)return;
@@ -309,11 +323,12 @@ function updateView(delta) {
     desiredCamera.add(new THREE.Vector3(0,0,2));cameraTarget.copy(renderPosition).addScaledVector(forward,3);cameraTarget.y+=.7;aircraft.visible=true;
   }
   cameraPosition.lerp(desiredCamera,1-Math.exp(-delta*(cameraMode==='fpv'?25:5)));camera.position.copy(cameraPosition);camera.lookAt(cameraTarget);
+  if(cameraMode==='fpv') { camera.rotateY(lookYaw);camera.rotateX(lookPitch); }
   sun.position.set(renderPosition.x-35,65,renderPosition.z+35);sun.target.position.set(renderPosition.x,0,renderPosition.z);
 }
 function animate(timestamp) {
   const delta=lastFrame?Math.min((timestamp-lastFrame)/1000,.064):0;lastFrame=timestamp;
-  try {if(ready && running)updateSimulation(delta);if(ready){updateView(delta);updateHud();}renderer.render(scene,camera);}catch(error){fail(error);}
+  try {if(ready && running){updateGamepads();updateSimulation(delta);}if(ready){updateView(delta);updateHud();}renderer.render(scene,camera);}catch(error){fail(error);}
 }
 
 $('start').onclick=start;$('menu-button').onclick=()=>inFlight?pause():openDialog('help-dialog');
@@ -321,7 +336,7 @@ $('brand').onclick=event=>{event.preventDefault();if(inFlight)pause();};
 $('pause').onclick=()=>pause();$('resume').onclick=resume;$('back-menu').onclick=backToMenu;$('arm').onclick=toggleArmed;
 function restart(){if(!ready||!inFlight)return;try{resetSession();running=true;$('pause-dialog').close();notify('已重設，在起飛點重新開始。');}catch(error){fail(error);}}
 $('reset').onclick=restart;$('pause-reset').onclick=restart;
-function toggleCamera(){cameraMode=cameraMode==='chase'?'fpv':'chase';$('camera').innerHTML=`${cameraMode==='chase'?'追蹤視角':'機頭視角'} <kbd>C</kbd>`;}
+function toggleCamera(){cameraMode=cameraMode==='chase'?'fpv':'chase';$('camera').innerHTML=`${cameraMode==='chase'?'追蹤視角':'第一人稱'} <kbd>C</kbd>`;if(cameraMode==='chase'&&document.pointerLockElement===renderer.domElement)document.exitPointerLock();}
 $('camera').onclick=toggleCamera;
 $('settings-open').onclick=()=>openDialog('settings-dialog');$('help-open').onclick=()=>openDialog('help-dialog');$('help-flight').onclick=()=>openDialog('help-dialog');
 $('save-session').onclick=exportSession;$('save-csv').onclick=exportCsv;
@@ -356,10 +371,28 @@ document.querySelectorAll('[data-key]').forEach(button=>{
   const release=()=>{keys.delete(button.dataset.key);button.classList.remove('pressed');};
   button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
 });
+function gamepadPressed(gamepad, button) { return !!gamepad.buttons?.[button]?.pressed; }
+function updateGamepads() {
+  for (const gamepad of navigator.getGamepads()) {
+    if (!gamepad) continue;
+    gamepadIndex ??= gamepad.index;
+    const previous = gamepadButtons.get(gamepad.index) ?? [];
+    const current = gamepad.buttons.map(button => button.pressed);
+    if (inFlight && running && !playback) {
+      if (gamepadPressed(gamepad, 0) && !previous[0]) toggleArmed();
+      if (gamepadPressed(gamepad, 3) && !previous[3]) toggleCamera();
+      if ((gamepadPressed(gamepad, 9) || gamepadPressed(gamepad, 16)) && !(previous[9] || previous[16])) pause();
+    }
+    gamepadButtons.set(gamepad.index, current);
+  }
+}
+addEventListener('gamepadconnected', event => { gamepadIndex ??= event.gamepad.index; log('Gamepad connected',{index:event.gamepad.index,id:event.gamepad.id,mapping:event.gamepad.mapping}); notify('手把已連線：左搖桿飛行、右搖桿左右轉向、扳機升降。'); });
+addEventListener('gamepaddisconnected', event => { gamepadButtons.delete(event.gamepad.index); if(gamepadIndex===event.gamepad.index)gamepadIndex=null; log('Gamepad disconnected',event.gamepad.index); });
 
 async function init() {
   try {
     createWorld();
+    $('scenario').replaceChildren(...SCENARIOS.map(item => { const option=document.createElement('option');option.value=item.id;option.textContent=`${item.name} — ${item.condition}`;return option;}));
     const [{default:createUAVSimCore},configResponse]=await Promise.all([import('./generated/uavsim.mjs'),fetch('./configs/generic_quadrotor_x01.json')]);
     if(!configResponse.ok)throw new Error('找不到機型設定。');
     core=await createUAVSimCore({print:text=>log('Core',text),printErr:text=>{

@@ -61,3 +61,6 @@ During this Windows session the user pushed the existing Machine A scaffold to t
 ## Required closeout
 
 Update `PROJECT_STATUS.md` with exact commands, results, installed versus preexisting components, approvals, blockers, and next executable actions. Commit and push to the supplied remote when Git identity/authentication allow it; do not invent identity or create a public remote. Mark incomplete gates explicitly and retain failed-operation logs.
+# Browser interaction follow-up — 2026-10-14
+
+Default camera is first-person. Pointer Lock and browser Gamepad API are used without adding a runtime package. Verify physical controls and actual browser rendering before accepting this interaction work. Future scenario mechanics must be separately modeled and validated; briefing tags are not a substitute for wind, sensor, RF, payload or multi-vehicle simulation.

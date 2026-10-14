@@ -89,3 +89,6 @@ No third-party C++ runtime or test framework is required for P0. Use the C++ sta
 - [Epic automation testing](https://dev.epicgames.com/documentation/unreal-engine/run-automation-tests-in-unreal-engine?lang=en-US) and [command-line reference](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-command-line-arguments-reference): headless test reports establish tested runtime behavior, not graphical rendering acceptance.
 - [Microsoft WSL installation](https://learn.microsoft.com/en-us/windows/wsl/install) and [WSL configuration](https://learn.microsoft.com/en-us/windows/wsl/wsl-config): distinguish feature/distribution installation, reboot requirements, configuration, and post-install verification.
 - [Python venv](https://docs.python.org/3.12/library/venv.html): create an isolated local environment rather than change global packages.
+# Browser input dependencies — 2026-10-14
+
+No dependency added. Mouse look uses the browser Pointer Lock API; controller input uses the browser Gamepad API. Both are platform APIs, not bundled third-party code. Existing pinned Three.js remains the renderer.

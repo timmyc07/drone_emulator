@@ -165,3 +165,10 @@ Measured after applying all Medium scalability groups. Durations include process
 | Editor automation | 50.971 | 2594.73 | 20.500 | 11390 / 12227 |
 | DX12 simple scene | 21.507 | 2019.23 | 17.531 | 11515 / 12227 |
 | Graphical Editor startup and level | 39.457 | 3395.12 | 32.703 | 11437 / 12227 |
+# Browser control and scenario update — 2026-10-14
+
+- PASS: `node --test web/game-logic.test.mjs tools/web/build-site.test.mjs tools/web/server.test.mjs` (3/3) and `node tests/wasm_smoke.mjs` passed on Windows 2026-10-14.
+- PASS (unit): keyboard/gamepad semantic input, deadzone, clamping, scenario-catalog fallback and existing replay/gate checks.
+- IMPLEMENTED: default first-person camera, click-initiated Pointer Lock mouse look, standards-based gamepad polling and 15 non-weaponized training templates.
+- NOT_TESTED: physical gamepad hardware, pointer-lock interaction in a browser, rendered scenario selection and cross-browser behavior. These require a local browser session after rebuild.
+- DEFERRED: wind, RF/GNSS, sensor, payload, moving-deck, contamination and multi-UAV models. Scenario labels make these limitations visible.

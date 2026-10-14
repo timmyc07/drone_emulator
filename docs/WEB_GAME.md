@@ -31,7 +31,11 @@ The model is cosmetic: the reference quadrotor uses existing documented engineer
 
 ## Play and sessions
 
-Choose six-ring training or free flight, then start. The aircraft arms and targets a 1 m hover. W/S move forward/backward; A/D move sideways; Q/E turn; Space/Ctrl change target altitude. F toggles motors, C changes camera, P pauses, R resets, and Esc opens the pause menu. Direction release levels the attitude; momentum remains, so opposite input brakes. Leaving the tab pauses the simulation. Touch buttons provide the same directional inputs; real touch-device acceptance is a separate gate.
+Choose a training scenario, then start. First-person view is the default. Click the rendered scene to capture the pointer; mouse movement changes the first-person look direction and Esc releases it. W/S move forward/backward; A/D move sideways; Q/E turn; Space/Ctrl change target altitude. F toggles motors, C changes camera, P pauses, and R resets. Direction release levels the attitude; momentum remains, so opposite input brakes. Leaving the tab pauses the simulation.
+
+Standard-mapped gamepads use left stick for pitch/roll, right-stick horizontal axis for yaw, right/left triggers for climb/descent, A for motor toggle, Y for camera mode, and Menu/Home for pause. The application polls `navigator.getGamepads()` once per rendered frame; connection and disconnect events are status-only. Browser mapping and physical-device results vary, so supported hardware must be verified separately.
+
+The scenario catalog includes basic flight, micro and route reconnaissance, search and rescue, mapping, inspection, disaster response, cargo/medical transport, maritime patrol, communications relay, weather/environmental monitoring, CBRN reconnaissance, research flight tests and single-aircraft traffic-separation drills. Current implemented mechanics are route/free-flight objectives, waypoint timing, telemetry and visual/environmental briefing tags. Wind, smoke, moving decks, RF/GNSS, payload, contamination, multi-UAV and sensor physics are explicitly marked as future work rather than simulated. Armed, loitering-munition and one-way attack scenarios are not part of this browser trainer.
 
 The settings dialog controls sensitivity, quality and metric/imperial display units, saved in browser local storage when available. Physics keeps the existing 0.004 s fixed timestep. The forest is visual scenery without tree or terrain collision physics.
 

@@ -95,3 +95,9 @@ The user supplied `https://github.com/timmyc07/drone_emulator.git`; the initial 
 Prepare macOS workflows without claiming execution. A configured GitHub Actions workflow remains NOT_TESTED until a real run succeeds. Overall P0 remains incomplete while any mandatory platform or Unreal gate lacks verified evidence.
 
 Preserve the remote's original core targets, version header, presets and Git LFS rules. Preset fields only need schema 2, so correct the former schema 6 / CMake 3.20 mismatch without increasing the minimum version. Hosted CI uses current official actions v7; platform runner labels remain the original supported macos-14 and windows-2022. Disable the unused AndroidFileServer plugin in the isolated Unreal fixture and ignore Editor-generated input defaults; retain only intentional project configuration in Git.
+# Browser control and scenario decisions — 2026-10-14
+
+- Use Pointer Lock only after an explicit rendered-canvas click. It avoids an unsupported automatic pointer capture and allows Esc to release the cursor.
+- Keep the C++20/WASM core authoritative for flight; browser keyboard and gamepad state are converted to the same bounded semantic input before `setInput`.
+- Default to first-person, with a user-toggleable chase camera. Camera look remains render-only and never writes physics state.
+- Provide a non-weaponized training catalog. Do not implement weapon release, targeting, attack, loitering-munition or one-way strike behaviors. Labels disclose deferred environmental and multi-vehicle mechanics.
