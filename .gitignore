@@ -28,3 +28,10 @@ reports/performance/*-local.md
 *.pem
 *.key
 .DS_Store
+
+# Windows session private evidence and generated validation map
+reports/
+CMakeUserPresets.json
+*.user
+unreal/P0Probe/Content/
+unreal/P0Probe/Config/DefaultInput.ini
