@@ -9,6 +9,7 @@ The user replaced the Unreal desktop target with a browser drone game using the 
 3. Exercise flight controls, pause/reset, gameplay and responsive layout in an actual browser; keep hardware gamepad support unclaimed until tested.
 4. Verify the local-only static server and prepared output boundary, preserve dependency notices and exclude unlicensed-for-redistribution user assets from GitHub.
 5. Run native regression checks, record actual browser/build evidence, update source documentation and synchronize source changes. Public hosting and broad P4–P7 expansion are outside this browser delivery.
+6. SIM-001–SIM-005 mission logic and the live SIM-001 quadrotor workflow are complete. Next fidelity work is separate: fixed-wing/VTOL/MALE/HALE models, atmospheric/energy/RF backends, then per-platform validation before removing proxy labels.
 
 See [WEB_GAME.md](WEB_GAME.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md) for executed browser results and remaining NOT_TESTED gates.
 

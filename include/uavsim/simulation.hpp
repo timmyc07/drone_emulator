@@ -96,6 +96,7 @@ public:
                         Environment environment = {}, double dt = 0.004);
     void reset(const State& state = {}, const std::array<double, 4>& rotor_speeds = {});
     void set_input(const Input& input);
+    void set_environment(const Environment& environment);
     void set_paused(bool paused);
     bool paused() const { return paused_; }
     void step();

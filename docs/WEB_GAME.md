@@ -35,7 +35,7 @@ Choose a training scenario, then start. First-person view is the default. Click 
 
 Standard-mapped gamepads use left stick for pitch/roll, right-stick horizontal axis for yaw, right/left triggers for climb/descent, A for motor toggle, Y for camera mode, and Menu/Home for pause. The application polls `navigator.getGamepads()` once per rendered frame; connection and disconnect events are status-only. Browser mapping and physical-device results vary, so supported hardware must be verified separately.
 
-The scenario catalog includes basic flight, micro and route reconnaissance, search and rescue, mapping, inspection, disaster response, cargo/medical transport, maritime patrol, communications relay, weather/environmental monitoring, CBRN reconnaissance, research flight tests and single-aircraft traffic-separation drills. Current implemented mechanics are route/free-flight objectives, waypoint timing, telemetry and visual/environmental briefing tags. Wind, smoke, moving decks, RF/GNSS, payload, contamination, multi-UAV and sensor physics are explicitly marked as future work rather than simulated. Armed, loitering-munition and one-way attack scenarios are not part of this browser trainer.
+SIM-001–SIM-005 now provide executable mission routes, deterministic disturbance schedules, automatic mission guidance, subsystem state, evaluation metrics, completion gates and reports. SIM-001 is backed by the current quadrotor physics and live wind environment. SIM-002–SIM-005 are scaled mission-system proxies; their RF/GNSS/payload/energy/thermal values are abstract training metrics, not calibrated platform physics. See [SCENARIOS.md](SCENARIOS.md). Authentic fixed-wing/MALE/HALE aerodynamics, high-altitude atmosphere, moving decks, contamination, multi-UAV and sensor physics remain future work. Armed, loitering-munition and one-way attack behaviors are not part of this browser trainer.
 
 The settings dialog controls sensitivity, quality and metric/imperial display units, saved in browser local storage when available. Physics keeps the existing 0.004 s fixed timestep. The forest is visual scenery without tree or terrain collision physics.
 
@@ -51,7 +51,10 @@ Run focused core, gameplay, bundle preflight and HTTP checks from the repository
 
 ```powershell
 node tests/wasm_smoke.mjs
-node --test web/game-logic.test.mjs tools/web/build-site.test.mjs tools/web/server.test.mjs
+node tests/mission_wasm.mjs
+node --test web/game-logic.test.mjs web/mission-engine.test.mjs
+node tools/web/build-site.test.mjs
+node tools/web/server.test.mjs
 ```
 
 To repeat native trajectory equivalence, pass an existing native `inputs.jsonl` path as the first argument to `tests/wasm_smoke.mjs`. The captured 5,000-step run had maximum state error `1.4094628242311558e-15`, below `1e-9`. Logs are `reports/web-build.log`, `reports/web-wasm-smoke.log` and `reports/web-native-regression.log`; generated artifacts are ignored. The restrictive agent sandbox can report `realpath` EPERM during HTTP checks; normal process permissions passed those checks without weakening path containment.

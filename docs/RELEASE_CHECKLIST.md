@@ -16,6 +16,9 @@ The user replaced the desktop delivery target with a browser game. The earlier d
 - [x] Browser-source commit `9ac524a9be891a6fc26cfc71d61ee55442745763` passed Windows and macOS native core CI in [run 38550487896](https://github.com/timmyc07/drone_emulator/actions/runs/38550487896); browser acceptance remains separately captured locally.
 - [x] Record actual tool versions/evidence in [PROJECT_STATUS.md](PROJECT_STATUS.md), and commit/push browser source and documentation.
 - [ ] Capture exact browser build numbers; current observations identify Chrome and the Codex in-app browser only.
+- [x] Implement and unit-test SIM-001–SIM-005 mission state, events, metrics, completion/failure and versioned reports; complete all five against the C++/WASM core and SIM-001 end-to-end in the actual browser.
+- [ ] Replace SIM-002–SIM-005 mission-system proxies with validated platform-specific flight/environment/RF models before claiming authentic fixed-wing, MALE or HALE simulation.
+- [ ] Repair or update the local MSVC installation/tool pairing that currently returns C1902, then rerun the affected native CTests; this session's WebAssembly build is PASS but native rebuild is BLOCKED.
 
 Commands and limitations are in [WEB_GAME.md](WEB_GAME.md). Unchecked items are not PASS.
 

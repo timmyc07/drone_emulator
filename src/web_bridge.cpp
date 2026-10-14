@@ -64,6 +64,14 @@ bool advance(double steps) {
 }
 bool reset() { return checked([] { session().reset(); }); }
 bool set_paused(bool paused) { return checked([&] { session().set_paused(paused); }); }
+bool set_environment(double wind_east_mps, double wind_north_mps, double wind_up_mps, double air_density) {
+    return checked([&] {
+        Environment environment = session().environment();
+        environment.wind_mps = Vec3(wind_east_mps, wind_north_mps, wind_up_mps);
+        environment.air_density = air_density;
+        session().set_environment(environment);
+    });
+}
 Json vector_json(const Vec3& value) { return Json::array({value.x(), value.y(), value.z()}); }
 std::string snapshot() {
     std::string result;
@@ -95,6 +103,7 @@ EMSCRIPTEN_BINDINGS(uavsim_web) {
     emscripten::function("advance", &advance);
     emscripten::function("reset", &reset);
     emscripten::function("setPaused", &set_paused);
+    emscripten::function("setEnvironment", &set_environment);
     emscripten::function("snapshot", &snapshot);
     emscripten::function("lastError", &last_error);
 }

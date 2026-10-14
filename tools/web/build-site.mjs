@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
 const copies = [
-  ...['index.html', 'style.css', 'app.js', 'game-logic.js'].map(name => [`web/${name}`, name]),
+  ...['index.html', 'style.css', 'app.js', 'game-logic.js', 'mission-engine.js', 'scenario-definitions.js'].map(name => [`web/${name}`, name]),
   ['web/generated', 'generated'], ['web/vendor/three', 'vendor/three'],
   ['local-assets/drone', 'assets/drone'],
   ['configs/vehicles/generic_quadrotor_x01.json', 'configs/generic_quadrotor_x01.json'],

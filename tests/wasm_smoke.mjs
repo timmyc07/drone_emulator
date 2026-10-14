@@ -40,6 +40,14 @@ ok(module.reset());
 assert.equal(state().step, 0);
 assert.equal(state().armed, false);
 assert.equal(state().grounded, true);
+ok(module.setEnvironment(3, -1, 0, 1.1));
+ok(module.setInput(true, 2, 0, 0, 0, 0.5, 2));
+ok(module.advance(64));
+assert.ok(state().velocity_mps[0] > 0, 'runtime wind must affect core velocity');
+const environmentState = state();
+assert.equal(module.setEnvironment(Infinity, 0, 0, 1.225), false);
+assert.deepEqual(state(), environmentState);
+ok(module.setEnvironment(0, 0, 0, 1.225));
 
 // Re-execute actual native recorded inputs; no duplicated JavaScript dynamics.
 if (process.argv[2]) {

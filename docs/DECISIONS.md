@@ -101,3 +101,7 @@ Preserve the remote's original core targets, version header, presets and Git LFS
 - Keep the C++20/WASM core authoritative for flight; browser keyboard and gamepad state are converted to the same bounded semantic input before `setInput`.
 - Default to first-person, with a user-toggleable chase camera. Camera look remains render-only and never writes physics state.
 - Provide a non-weaponized training catalog. Do not implement weapon release, targeting, attack, loitering-munition or one-way strike behaviors. Labels disclose deferred environmental and multi-vehicle mechanics.
+- Implement SIM-001–SIM-005 as a data-driven deterministic mission layer over the existing C++/WASM core. Apply wind through the new validated core environment setter; keep position, velocity and attitude authoritative in the core.
+- Treat energy, GNSS estimate, link, payload, buffering and thermal state as explicitly labeled abstract mission metrics. SIM-002–SIM-005 are mission-system proxies until separate vehicle/atmosphere/RF backends are implemented and validated.
+- Use bounded velocity-error guidance with FLU body-axis signs and a 3.5 m/s mission speed cap. Browser acceptance exposed and corrected the initial lateral-sign/high-speed overshoot; completion still requires actual ground contact and metric thresholds.
+- Follow PX4/MAVLink lifecycle and failsafe concepts without importing their code or adding dependencies. Preserve a versioned report with per-metric source labels so abstractions cannot be mistaken for C++ flight truth.

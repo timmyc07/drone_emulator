@@ -207,6 +207,13 @@ void runtime() {
     Environment wind = airborne(); wind.wind_mps.x() = 5;
     Simulation windy(reference_quadrotor(), wind); windy.step();
     check(windy.snapshot().state.velocity_mps.x() > 0, "wind drag follows relative air velocity");
+    Environment changed = windy.environment(); changed.wind_mps = Vec3(-2, 3, 0); changed.air_density = 1.0;
+    windy.set_environment(changed);
+    check(windy.environment().wind_mps == changed.wind_mps && windy.environment().air_density == 1.0, "runtime environment update");
+    const Environment valid_environment = windy.environment();
+    changed.wind_mps.x() = std::numeric_limits<double>::infinity();
+    rejects([&] { windy.set_environment(changed); });
+    check(windy.environment().wind_mps == valid_environment.wind_mps, "invalid environment update is atomic");
     State extreme; extreme.velocity_mps.x() = 1e200;
     windy.reset(extreme);
     const Snapshot valid = windy.snapshot();

@@ -92,3 +92,7 @@ No third-party C++ runtime or test framework is required for P0. Use the C++ sta
 # Browser input dependencies — 2026-10-14
 
 No dependency added. Mouse look uses the browser Pointer Lock API; controller input uses the browser Gamepad API. Both are platform APIs, not bundled third-party code. Existing pinned Three.js remains the renderer.
+
+# Mission scenario dependencies — 2026-10-14
+
+No dependency added. The mission definitions and state machine use project JavaScript modules; live wind uses the existing C++ core through the Emscripten binding. PX4, ArduPilot, QGroundControl and JSBSim were research references only and are not linked, vendored or claimed integrated.

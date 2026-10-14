@@ -64,3 +64,7 @@ Update `PROJECT_STATUS.md` with exact commands, results, installed versus preexi
 # Browser interaction follow-up — 2026-10-14
 
 Default camera is first-person. Pointer Lock and browser Gamepad API are used without adding a runtime package. Verify physical controls and actual browser rendering before accepting this interaction work. Future scenario mechanics must be separately modeled and validated; briefing tags are not a substitute for wind, sensor, RF, payload or multi-vehicle simulation.
+
+# Mission scenario follow-up — 2026-10-14
+
+SIM-001–SIM-005 now have executable deterministic mission mechanics rather than briefing-only tags. Wind reaches the C++ core; navigation, communications, payload, energy and thermal behavior are documented abstract models. Browser SIM-001 completed end-to-end. Platform-specific flight models and physical gamepad verification remain separate gates; local native rebuild is BLOCKED by MSVC C1902.

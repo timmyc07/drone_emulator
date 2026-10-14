@@ -16,7 +16,7 @@ const entrypoints = [
     .map(name => `web/vendor/three/${name}`),
 ];
 const sourceFiles = [
-  ...['index.html', 'style.css', 'app.js', 'game-logic.js'].map(name => `web/${name}`),
+  ...['index.html', 'style.css', 'app.js', 'game-logic.js', 'mission-engine.js', 'scenario-definitions.js'].map(name => `web/${name}`),
   'configs/vehicles/generic_quadrotor_x01.json',
   ...['NOTICES.md', 'README.md', 'eigen/COPYING.README', 'eigen/COPYING.MPL2', 'eigen/COPYING.BSD', 'eigen/COPYING.MINPACK', 'nlohmann/LICENSE.MIT', 'picosha2/LICENSE'].map(name => `third_party/${name}`),
   ...['source/QuadDrone [mesh].fbx', 'textures/SpaceProbe_[diffuse].png', 'textures/SpaceProbe_[normals].png', 'textures/SpaceProbe_[metal].png', 'textures/SpaceProbe_[gloss].png', 'textures/Spaceprobe_[occlusion].png', 'textures/SpaceProbe_[emission-yellow].png'].map(name => `local-assets/drone/${name}`),

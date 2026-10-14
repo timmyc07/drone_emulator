@@ -1,1 +1,1 @@
-{"name":"uavsim-browser","private":true,"type":"module","scripts":{"test":"node game-logic.test.mjs"}}
+{"name":"uavsim-browser","private":true,"type":"module","scripts":{"test":"node --test game-logic.test.mjs mission-engine.test.mjs"}}

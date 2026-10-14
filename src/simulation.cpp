@@ -233,6 +233,10 @@ void Simulation::set_input(const Input& input) {
     snapshot_.armed = input.armed;
     snapshot_.mode = input.mode;
 }
+void Simulation::set_environment(const Environment& environment) {
+    validate_environment(environment);
+    environment_ = environment;
+}
 void Simulation::set_paused(bool paused) {
     if (paused_ != paused) std::clog << "INFO: simulation paused=" << paused << '\n';
     paused_ = paused;

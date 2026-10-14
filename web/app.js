@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { STEP, GATES, SCENARIOS, clamp, controls, crossedGate, gamepadFlightInput, mergeFlightInput, scenarioById, toRenderPosition, toRenderQuaternion, validSnapshot, validateReplay, elapsedLabel } from './game-logic.js';
+import { isMissionScenario } from './scenario-definitions.js';
+import { advanceMission, createMissionRun, estimatedPosition, guidanceInput, missionMetrics, missionReport, missionTarget } from './mission-engine.js';
 
 const $ = id => document.getElementById(id);
 const log = (event, detail = '') => console.info(`[UAVSim] ${event}`, detail);
@@ -15,12 +17,14 @@ try {
 } catch (error) { console.warn('[UAVSim] Settings unavailable', error.message); }
 let core, renderer, scene, camera, aircraft, model, sun;
 let ready = false, state, previousState, running = false, inFlight = false, armed = false;
-let mode = 'course', scenario = scenarioById('course'), cameraMode = 'fpv', targetAltitude = 1, gateIndex = 0, finished = false;
+let mode = 'mission', scenario = scenarioById('sim-001'), cameraMode = 'fpv', targetAltitude = 1, gateIndex = 0, finished = false;
 let accumulator = 0, lastFrame = 0, frames = [], lastRecord = -1, recordFull = false;
 let playback = null, playbackTime = 0, playbackIndex = 0, toastTimer;
 let lookYaw = 0, lookPitch = 0, gamepadIndex = null;
+let missionRun = null, autoMission = true, environmentKey = '';
 const gamepadButtons = new Map();
 const gateMeshes = [], cameraPosition = new THREE.Vector3(), cameraTarget = new THREE.Vector3();
+const missionMeshes = [];
 const renderPosition = new THREE.Vector3(), renderRotation = new THREE.Quaternion();
 const forward = new THREE.Vector3(), desiredCamera = new THREE.Vector3();
 
@@ -125,6 +129,7 @@ function createWorld() {
   document.addEventListener('pointerlockchange', () => {
     if (document.pointerLockElement === renderer.domElement) log('First-person mouse look captured');
   });
+  document.addEventListener('pointerlockerror', () => { console.warn('[UAVSim] Pointer Lock unavailable'); notify('瀏覽器未允許鎖定游標；鍵盤與手把仍可操作。'); });
   document.addEventListener('mousemove', event => {
     if (document.pointerLockElement !== renderer.domElement || !inFlight || !running || cameraMode !== 'fpv') return;
     lookYaw -= event.movementX * .0025 * settings.sensitivity;
@@ -182,21 +187,37 @@ async function loadDrone() {
 
 function refreshGates() {
   gateMeshes.forEach((group,index)=>{group.visible=mode==='course';group.children[0].material.color.set(index<gateIndex?'#708767':index===gateIndex?'#d9f58b':'#bbc9b4');group.children[0].material.emissiveIntensity=index===gateIndex?1.5:.08;group.children[2].material.opacity=index===gateIndex?1:.4;});
-  $('gate-count').innerHTML=mode==='course'?`${Math.min(gateIndex+1,6).toString().padStart(2,'0')} <span>/ 06</span>`:'FREE <span>FLIGHT</span>';
+  missionMeshes.forEach((marker,index)=>{marker.visible=mode==='mission';marker.children[0].material.color.set(index<(missionRun?.waypointIndex??0)?'#708767':index===(missionRun?.waypointIndex??0)?'#d9f58b':'#91a69a');marker.children[0].material.emissiveIntensity=index===(missionRun?.waypointIndex??0)?1.4:.1;});
+  $('gate-count').innerHTML=mode==='mission'?`${Math.min((missionRun?.waypointIndex??0)+1,scenario.route.length).toString().padStart(2,'0')} <span>/ ${scenario.route.length.toString().padStart(2,'0')}</span>`:mode==='course'?`${Math.min(gateIndex+1,6).toString().padStart(2,'0')} <span>/ 06</span>`:'FREE <span>FLIGHT</span>';
   $('mission-label').textContent=playback?'飛行狀態回放':scenario.name;
-  $('mission-progress').style.width=`${gateIndex/6*100}%`;
+  $('mission-progress').style.width=`${mode==='mission'?(missionRun?.waypointIndex??0)/scenario.route.length*100:gateIndex/6*100}%`;
+}
+function configureMissionMarkers() {
+  for(const marker of missionMeshes){marker.traverse(child=>{child.geometry?.dispose();if(Array.isArray(child.material))child.material.forEach(value=>value.dispose());else child.material?.dispose();});scene.remove(marker);}missionMeshes.length=0;
+  if(!isMissionScenario(scenario))return;
+  scenario.route.forEach((point,index)=>{
+    const group=new THREE.Group();group.position.fromArray(toRenderPosition(point.position));
+    const beacon=new THREE.Mesh(new THREE.SphereGeometry(.38,12,8),new THREE.MeshStandardMaterial({color:'#91a69a',emissive:'#d9f58b',emissiveIntensity:.1}));group.add(beacon);
+    const beam=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,Math.max(.2,point.position[2]),5),material('#d3d8b6'));beam.position.y=-point.position[2]/2;group.add(beam);
+    group.userData={missionIndex:index,name:point.name};scene.add(group);missionMeshes.push(group);
+  });
+}
+function setCoreEnvironment(wind=[0,0,0],airDensity=1.225) {
+  const key=[...wind,airDensity].join(',');if(key===environmentKey)return;
+  check(core.setEnvironment(wind[0],wind[1],wind[2],airDensity));environmentKey=key;
 }
 function resetSession() {
   check(core.reset());check(core.setPaused(false));state=readState();previousState=state;
-  targetAltitude=1;gateIndex=0;finished=false;armed=true;accumulator=0;frames=[];lastRecord=-1;recordFull=false;playback=null;
-  clearKeys();refreshGates();log('Session reset');
+  environmentKey='';setCoreEnvironment();missionRun=isMissionScenario(scenario)?createMissionRun(scenario):null;autoMission=!!missionRun;
+  targetAltitude=missionRun?0:1;gateIndex=0;finished=false;armed=!missionRun;accumulator=0;frames=[];lastRecord=-1;recordFull=false;playback=null;lookYaw=lookPitch=0;
+  configureMissionMarkers();clearKeys();refreshGates();log('Session reset',{scenario:scenario.id,fidelity:scenario.fidelity??'basic'});
 }
 function start() {
   if(!ready)return;
   try {
     scenario=scenarioById($('scenario').value);mode=scenario.mode;resetSession();inFlight=true;running=true;
     $('menu').hidden=true;$('scene-caption').hidden=true;$('flight-hud').hidden=false;
-    $('pause-dialog').close();notify('第一人稱已啟用。點擊畫面後用滑鼠查看；Space 上升，W 向前。');
+    $('pause-dialog').close();notify(missionRun?'任務自檢開始；自動任務控制已啟用。':'第一人稱已啟用。點擊畫面後用滑鼠查看；Space 上升，W 向前。');
   } catch(error){fail(error);}
 }
 function pause(title='稍作停留',message='飛行已暫停，準備好再繼續。') {
@@ -205,6 +226,7 @@ function pause(title='稍作停留',message='飛行已暫停，準備好再繼�
   if(core)check(core.setPaused(true));
   $('pause-title').textContent=title;$('pause-message').textContent=message;
   $('resume').disabled=finished && !playback;$('save-session').disabled=!!playback || frames.length<2;$('save-csv').disabled=!!playback || frames.length<2;
+  $('mission-report').disabled=!missionRun;
   if(!$('pause-dialog').open)$('pause-dialog').showModal();
   log('Paused',title);
 }
@@ -242,12 +264,16 @@ function exportCsv() {
   for(const frame of frames)rows.push([frame.time,...frame.position_m,...frame.velocity_mps,...frame.orientation_wxyz,Number(frame.armed),Number(frame.grounded)].join(','));
   saveFile('uavsim-telemetry.csv',rows.join('\n'),'text/csv');
 }
+function exportMissionReport() {
+  if(!missionRun||!state)return notify('目前沒有任務報告。');
+  saveFile(`${scenario.id}-mission-report.json`,JSON.stringify(missionReport(missionRun,scenario,state),null,2),'application/json');
+}
 async function openReplay(file) {
   if(!file||!ready)return;
   try {
     if(file.size>16*1024*1024)throw new Error('回放檔案超過 16 MB 限制。');
     const recorded=validateReplay(JSON.parse(await file.text()));
-    running=false;check(core.setPaused(true));playback=recorded;playbackTime=0;playbackIndex=0;state=playback[0];previousState=state;
+    running=false;check(core.setPaused(true));playback=recorded;missionRun=null;playbackTime=0;playbackIndex=0;state=playback[0];previousState=state;
     inFlight=true;running=true;finished=false;mode='free';clearKeys();$('menu').hidden=true;$('scene-caption').hidden=true;$('flight-hud').hidden=false;refreshGates();
     notify('正在播放記錄狀態；這不是物理重新運算。');log('State playback opened',{frames:recorded.length});
   }catch(error){console.error('[UAVSim] Invalid replay',error.message);notify(`無法開啟回放：${error.message}`);}
@@ -266,12 +292,25 @@ function updateSimulation(delta) {
   const steps=Math.min(64,Math.floor(accumulator/STEP));
   if(!steps)return;
   const gamepad = gamepadIndex === null ? [...navigator.getGamepads()].find(Boolean) : navigator.getGamepads()[gamepadIndex];
-  const input=mergeFlightInput(controls(keys,settings.sensitivity),gamepadFlightInput(gamepad,settings.sensitivity));
-  targetAltitude=clamp(targetAltitude+input.climb*2.5*steps*STEP,0,50);
+  let input=mergeFlightInput(controls(keys,settings.sensitivity),gamepadFlightInput(gamepad,settings.sensitivity));
+  if(missionRun) {
+    setCoreEnvironment(missionRun.wind_mps);
+    if(autoMission&&missionRun.phase!=='PREFLIGHT') {
+      const target=missionTarget(missionRun,scenario), guidance=guidanceInput(state,target,estimatedPosition(missionRun,state));
+      input=mergeFlightInput(input,{roll:guidance.roll,pitch:guidance.pitch,yaw:guidance.yaw,climb:0});targetAltitude=guidance.altitude_m;
+    } else targetAltitude=clamp(targetAltitude+input.climb*2.5*steps*STEP,0,50);
+  } else targetAltitude=clamp(targetAltitude+input.climb*2.5*steps*STEP,0,50);
   check(core.setInput(armed,2,input.roll,input.pitch,input.yaw,.5,targetAltitude));
   const before=toRenderPosition(state.position_m);
   if(steps>1){check(core.advance(steps-1));previousState=readState();}else previousState=state;
   check(core.advance(1));state=readState();accumulator-=steps*STEP;
+  if(missionRun) {
+    const previousPhase=missionRun.phase;missionRun=advanceMission(missionRun,scenario,state,steps*STEP);
+    if(previousPhase==='PREFLIGHT'&&missionRun.phase==='TAKEOFF')armed=true;
+    for(const message of missionRun.messages){notify(message);log('Mission event',{scenario:scenario.id,phase:missionRun.phase,message});}
+    refreshGates();
+    if(missionRun.status!=='ACTIVE'&&!finished){finished=true;armed=false;pause(missionRun.status==='COMPLETE'?'任務完成':'任務未通過',missionRun.result);}
+  }
   if(!recordFull && state.time-lastRecord>=.1) {
     frames.push(state);lastRecord=state.time;
     if(frames.length===18000){recordFull=true;notify('本段記錄已達上限。可匯出後重新開始。');log('Recording limit reached');}
@@ -286,6 +325,7 @@ function updateSimulation(delta) {
 }
 function updateHud() {
   if(!state)return;
+  $('mission-systems').hidden=!missionRun;
   const imperial=settings.units==='imperial',height=state.position_m[2]*(imperial?3.28084:1),speed=Math.hypot(state.velocity_mps[0],state.velocity_mps[1])*(imperial?2.23694:1),vertical=state.velocity_mps[2]*(imperial?3.28084:1);
   const [w,x,y,z]=state.orientation_wxyz,yaw=Math.atan2(2*(w*z+x*y),1-2*(y*y+z*z));
   $('altitude').innerHTML=`${height.toFixed(1)}<em>${imperial?'ft':'m'}</em>`;
@@ -296,10 +336,19 @@ function updateHud() {
   $('flight-state').textContent=playback?'記錄回放':state.armed?'定高輔助':'旋翼停轉';
   $('record-state').textContent=playback?'狀態播放':recordFull?'記錄已滿':running?'● 記錄中':'已暫停';
   $('arm').innerHTML=`${armed?'停轉':'啟動'} <kbd>F</kbd>`;$('arm').disabled=!!playback;
-  if(mode==='course' && gateIndex<GATES.length) {
+  if(missionRun) {
+    const target=scenario.route[Math.min(missionRun.waypointIndex,scenario.route.length-1)],metrics=missionMetrics(missionRun,scenario,state);
+    $('mission-hint').textContent=`${missionRun.phase} · ${target?.name??'完成'} · 能源 ${missionRun.energy_pct.toFixed(0)}%`;
+    $('mission-phase').textContent=missionRun.phase;$('mission-objective').textContent=target?.name??missionRun.result??'完成';
+    $('subsystem-state').textContent=`LINK ${missionRun.link_quality_pct.toFixed(0)}% · GNSS ±${missionRun.gnss_error_m.toFixed(1)}m · ${missionRun.sensorMode} · ${missionRun.temperature_c.toFixed(0)}°C`;
+    $('metric-state').textContent=`航點 ${metrics.waypoint_completion_pct.toFixed(0)}% · 資料 ${metrics.data_valid_pct.toFixed(0)}% · 鏈路 ${metrics.link_availability_pct.toFixed(0)}%`;
+    $('auto-mission').innerHTML=`${autoMission?'自動任務 ON':'自動任務 OFF'} <kbd>M</kbd>`;$('auto-mission').hidden=false;
+    $('mission-report').disabled=false;
+  } else if(mode==='course' && gateIndex<GATES.length) {
     const distance=Math.hypot(...toRenderPosition(state.position_m).map((v,i)=>v-GATES[gateIndex][i]));
     $('mission-hint').textContent=`距離 ${distance.toFixed(0)} m · 目標高度 ${GATES[gateIndex][1]} m`;
-  } else $('mission-hint').textContent=playback?'重現已記錄的飛行狀態':`${scenario.briefing} · ${scenario.condition}`;
+    $('auto-mission').hidden=true;
+  } else {$('mission-hint').textContent=playback?'重現已記錄的飛行狀態':`${scenario.briefing} · ${scenario.condition}`;$('auto-mission').hidden=true;}
 }
 function updateView(delta) {
   if(!state)return;
@@ -338,6 +387,8 @@ function restart(){if(!ready||!inFlight)return;try{resetSession();running=true;$
 $('reset').onclick=restart;$('pause-reset').onclick=restart;
 function toggleCamera(){cameraMode=cameraMode==='chase'?'fpv':'chase';$('camera').innerHTML=`${cameraMode==='chase'?'追蹤視角':'第一人稱'} <kbd>C</kbd>`;if(cameraMode==='chase'&&document.pointerLockElement===renderer.domElement)document.exitPointerLock();}
 $('camera').onclick=toggleCamera;
+function toggleAutoMission(){if(!missionRun||playback)return;autoMission=!autoMission;notify(autoMission?'自動任務控制已啟用':'自動任務控制已關閉；由您接管飛行');log('Mission control changed',autoMission);}
+$('auto-mission').onclick=toggleAutoMission;$('mission-report').onclick=exportMissionReport;
 $('settings-open').onclick=()=>openDialog('settings-dialog');$('help-open').onclick=()=>openDialog('help-dialog');$('help-flight').onclick=()=>openDialog('help-dialog');
 $('save-session').onclick=exportSession;$('save-csv').onclick=exportCsv;
 $('replay-open').onclick=()=>{if(ready)$('replay-file').click();else notify('請等待資源載入完成。');};
@@ -360,7 +411,7 @@ addEventListener('keydown',event=>{
   }
   if(flightKeys.has(event.code)){event.preventDefault();if(running&&!playback)keys.add(event.code);return;}
   if(event.repeat)return;
-  const actions={KeyP:()=>pause(),KeyF:toggleArmed,KeyR:restart,KeyC:toggleCamera,Escape:()=>pause()};
+  const actions={KeyP:()=>pause(),KeyF:toggleArmed,KeyR:restart,KeyC:toggleCamera,KeyM:toggleAutoMission,Escape:()=>pause()};
   if(actions[event.code]){event.preventDefault();actions[event.code]();}
 });
 addEventListener('keyup',event=>keys.delete(event.code));
